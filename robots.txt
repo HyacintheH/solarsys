@@ -1,0 +1,7 @@
+User-agent: *
+
+Disallow: /js
+
+Disallow: /server
+
+Sitemap: http://solarsys.io/sitemap.xml
