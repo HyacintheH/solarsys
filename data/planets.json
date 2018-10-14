@@ -15,6 +15,94 @@
                     "0": "moon"
                 }
             ]
+        },
+        {
+            "name": "jupiter",
+            "radius": 71492,
+            "aphelion": 816040000,
+            "perihelion": 740550000,
+            "speed": 13.07,
+            "inclination": 6.09,
+            "axial_tilt": 3.13,
+            "period": 9.925,
+            "way": "forward"
+        },
+        {
+            "name": "mars",
+            "radius": 3396.2,
+            "aphelion": 249200000,
+            "perihelion": 206700000,
+            "speed": 24.077,
+            "inclination": 5.65,
+            "axial_tilt": 25.19,
+            "period": 1.025957,
+            "way": "forward"
+        },
+        {
+            "name": "mercury",
+            "radius":2439.7,
+            "aphelion": 69816900,
+            "perihelion": 46001200,
+            "speed":  47.362,
+            "inclination": 3.38,
+            "axial_tilt": 0.034,
+            "period": 58.646,
+            "way": "forward"
+        },
+        {
+            "name": "neptune",
+            "radius": 24764,
+            "aphelion": 4540000000,
+            "perihelion": 4460000000,
+            "speed": 5.43,
+            "inclination": 6.43,
+            "axial_tilt": 28.32,
+            "period": 0.6713,
+            "way": "forward"
+        },
+        {
+            "name": "pluto",
+            "radius": 1187,
+            "aphelion": 7375930000,
+            "perihelion": 4436820000,
+            "speed": 4.67,
+            "inclination": 17.16,
+            "axial_tilt": 122.53,
+            "period": 6.387230,
+            "way": "forward"
+        },
+        {
+            "name": "saturn",
+            "radius": 60268,
+            "aphelion": 1509000000,
+            "perihelion": 1350000000,
+            "speed": 9.69,
+            "inclination": 5.51,
+            "axial_tilt": 26.73,
+            "period": 10.55,
+            "way": "forward"
+        },
+        {
+            "name": "uranus",
+            "radius": 25559,
+            "aphelion": 3008000000,
+            "perihelion": 2742000000,
+            "speed": 6.80,
+            "inclination": 6.48,
+            "axial_tilt": 97.77,
+            "period": 0.71833,
+            "way": "forward"
+        },
+        {
+            "name": "venus",
+            "radius": 6051.8,
+            "aphelion": 108939000,
+            "perihelion": 107477000,
+            "speed": 35.02,
+            "inclination": 3.86,
+            "axial_tilt": 2.64,
+            "period": 243.025,
+            "way": "retrograde"
         }
     ]
 }
