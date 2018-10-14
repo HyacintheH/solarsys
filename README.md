@@ -1,2 +1,2 @@
 # solarsys
-Solar system simulator written in s and using the library Three.js
+Solar system simulator written in js and using the library Three.js
