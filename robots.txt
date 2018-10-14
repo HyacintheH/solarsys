@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: /js
 Disallow: /server
-Sitemap: http://solarsys.io/sitemap.xml
+Sitemap: https://solarsys.netlify.com/sitemap.xml
