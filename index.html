@@ -2,151 +2,49 @@
 <html lang="en">
 
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>SolarSys | Solar System Simulator</title>
-	<meta name="description" content="Since I was a child, I have been dreaming of traveling in space. I'm not sure I'll be able to do it one day so I decided to do it virtually.
-For now, I have only partially virtualized the solar system. But I intend to improve this system and add others later, for example Proxima Centauris."
-	/>
-	<meta name="copyright" content="Hyacinthe Hervé" />
-	<meta property="og:title" content="SolarSys | Solar System Simulator" />
-	<meta property="og:description" content="Since I was a child, I have been dreaming of traveling in space. I'm not sure I'll be able to do it one day so I decided to do it virtually.
-For now, I have only partially virtualized the solar system. But I intend to improve this system and add others later, for example Proxima Centauris."
-	/>
-	<meta property="og:image" content="http://solarsys.io/img/btn-8.jpg" />
-	<meta property="og:url" content="http://solarsys.io" />
-	<meta property="og:type" content="website" />
-	<link href="css/vendor.min.css" rel="stylesheet" type="text/css" />
-	<link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css?family=Reenie+Beanie" rel="stylesheet">
-	<link rel="stylesheet" type="text/css" href="css/style.css" media="all" />
-	<link rel="icon" type="image/icom" href="favicon.ico" />
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title>SolarSys | Interactive 3D Solar System</title>
+	<meta name="description"
+		content="An immersive 3D visualization of the Solar System built with Three.js. Explore planets and orbits in real-time. Project created by Hyacinthe Hervé.">
+	<meta name="author" content="Hyacinthe Hervé">
+
+	<link rel="stylesheet" href="css/style.css">
+
+	<script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
 </head>
 
 <body>
-	<article id="system-article">
-		<div class="row">
-			<div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
-				<h5>Welcome to SolarSys, a web solar system simulator...</h5>
-			</div>
-			<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 text-right">
-				<button type="button" class="btn btn-default btn-system-article"><span class="glyphicon glyphicon-remove"></span></button>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-				<h5>Camera controls</h5>
-				<ul>
-					<li>Orbit - left mouse / touch: one finger move</li>
-					<li>Zoom - middle mouse, or mousewheel / touch: two finger spread or squish</li>
-					<li>Pan - right mouse, or arrow keys / touch: three finter swipe</li>
-				</ul>
-				<h5>Informations</h5>
-				<p>The ratio of the distance of the planets to the sun and the planet's size is 1/100. So the planet's size scale is 100
-					times larger than the distance scale. If you enlarge the distance scale to get closer to reality then the planets will
-					come out of the screen.</p>
-				<p>The scale of planets size is twice as large as that of the sun. So the sun should be twice voluminous compared to the
-					planets.
-				</p>
-				<h5>Copyright</h5>
-				<ul>
-					<li>Hyacinthe Hervé - solarsys.io owner, website logic, design and animation</li>
-					<li>jQuery - MIT licence</li>
-					<li>BootStrap - MIT licence</li>
-					<li>Three.js - MIT licence</li>
-					<li>OrbitControls.js - MIT licence</li>
-					<li>threex.planets.js - Jérome Etienne</li>
-					<li>Pictures and materials - NASA, JHL's Planet Pixel Emporium</li>
-				</ul>
-			</div>
-		</div>
-	</article>
-	<article id="monitor-article">
-		<div class="row">
-			<div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
-				<h5>Monitoring</h5>
-			</div>
-			<div class="col-offset-10 col-xs-2 col-sm-2 col-md-2 col-lg-2 text-right">
-				<button type="button" class="btn btn-default btn-monitor-article"><span class="glyphicon glyphicon-remove"></span></button>
-			</div>
-		</div>
-		<h6><span id="planet-name-monitor">Earth</span></h6>
-		<ul>
-			<li>Year: <span id="date-monitor"></span></li>
-			<li>Distance from the Sun: <span id="distance-monitor"></span> km</li>
-			<li>Equatorial radius: <span id="radius-monitor"></span> km</li>
-		</ul>
-		<h6>Sun</h6>
-		<ul>
-			<li>Real equatorial radius: 695,700 km</li>
-			<li>Current equatorial radius: 347,850 km</li>
-		</ul>
-	</article>
 
-	<div class="container-fluid">
-		<div class="row" id="main">
-			<div id="world"></div>
+	<div class="main-layout">
+
+		<nav id="planet-menu">
+		</nav>
+
+		<div id="world">
+			<button id="btn-credits">© Crédits</button>
+			<div id="credits-modal" class="hidden">
+				<div class="modal-content">
+					<h2>Système Solaire 3D</h2>
+					<p>Créé par <strong>Hyacinthe Hervé</strong></p>
+					<p>Développé avec <a href="https://threejs.org" target="_blank">Three.js</a></p>
+					<p>Textures fournies par la NASA et Solar System Scope.</p>
+					<button id="close-credits">Fermer</button>
+				</div>
+			</div>
 		</div>
+
 	</div>
-	<nav class="navbar navbar-default navbar-fixed-bottom" id="footer">
-		<div class="container-fluid">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
-					aria-expanded="false">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-				<div class="col-xs-6 visible-xs">
-					<h1 class="brand">SolarSys<br/><small>Solar system exploration</small></h1>
-				</div>
-			</div>
-			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-				<div class="hidden-xs col-sm-2 col-md-1 col-lg-1 no-padding-right no-padding-left">
-					<h1 class="brand">SolarSys<br/><small>Solar system exploration</small></h1>
-				</div>
-				<div class="col-xs-12 col-sm-10 col-md-4 col-lg-3 no-padding-left no-padding-right text-center" id="menu">
-				</div>
-				<div class="col-xs-12 col-sm-6 col-md-1 col-lg-1 text-right">
-					<div class="form-group">
-						<input id="speed" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 slider" type="text" data-slider-min="1000" data-slider-max="1000000"
-							data-slider-step="1" data-slider-value="100000" />
-						<label for="speed" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">Speed</label>
-					</div>
-				</div>
-				<div class="col-xs-12 col-sm-6 col-md-1 col-lg-1 text-right">
-					<div class="form-group">
-						<input id="distance" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 slider" type="text" data-slider-min="1" data-slider-max="1000000"
-							data-slider-step="1" data-slider-value="500000" />
-						<label for="distance" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">Distance</label>
-					</div>
-				</div>
-				<div class="col-xs-12 col-sm-6 col-md-1 col-lg-1 text-right">
-					<div class="form-group">
-						<input id="rotation" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 slider" type="text" data-slider-min="1" data-slider-max="50"
-							data-slider-step="1" data-slider-value="10" />
-						<label for="rotation" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">Rotation</label>
-					</div>
-				</div>
-				<div class="col-xs-12 col-sm-6 col-md-1 col-lg-1 text-right">
-					<div class="form-group">
-						<input id="scale" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 slider" type="text" data-slider-min="1" data-slider-max="50"
-							data-slider-step="1" data-slider-value="1" data-slider-reversed="true"/>
-						<label for="scale" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">Scale</label>
-					</div>
-				</div>
-				<div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 no-padding-left text-center">
-					<button type="button" class="btn btn-default btn-menu btn-system-article" data-toggle="tooltip" data-placement="top" title="Informations"><span class="glyphicon glyphicon-info-sign"></span></button>
-					<button type="button" class="btn btn-default btn-menu btn-monitor-article" id="info" data-toggle="tooltip" data-placement="top" title="Monitoring"><span class="glyphicon glyphicon-time"></span></button>
-					<button type="button" class="btn btn-default btn-menu" id="pause" data-toggle="tooltip" data-placement="top" title="Pause"><span class="glyphicon glyphicon-pause"></span></button>
-				</div>
-			</div>
-		</div>
-	</nav>
-	<script type="text/javascript" src="js/vendor.min.js"></script>
-	<script type="text/javascript" src="js/main.min.js"></script>
+
+	<script type="module" src="js/main.js"></script>
 </body>
 
 </html>
