@@ -80,7 +80,13 @@
             "inclination": 5.51,
             "axial_tilt": 26.73,
             "period": 10.55,
-            "way": "forward"
+            "way": "forward",
+            "rings": {
+                "innerRadius": 74500,
+                "outerRadius": 140220,
+                "texture": "saturnringcolor.jpg",
+                "alphaMap": "saturnringpattern.gif"
+            }
         },
         {
             "name": "uranus",

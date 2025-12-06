@@ -1,154 +1,91 @@
-body {
-	background-color: rgba(0, 0, 0, 1);
-	overflow: hidden;
+body,
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: black;
 }
 
-h1.brand {
-	font-size: 0.9em;
+.main-layout {
+    display: flex;
+    /* Active la disposition Gauche/Droite */
+    height: 100vh;
+    /* Prend tout l'écran */
 }
 
-body, h1, h2, h3, h4, h5, h6, p {
-	font-family: 'Space Mono', monospace;
-	color: ghostwhite;
-	text-align: justify;
+#planet-menu {
+    width: 100px;
+    /* Largeur de ta colonne de boutons */
+    background: #111;
+    /* Fond sombre */
+    display: flex;
+    flex-direction: column;
+    /* Empile les images verticalement */
+    align-items: center;
+    /* Centre les images dans la colonne */
+    padding: 10px 0;
+    overflow-y: auto;
+    /* Scroll si trop de planètes */
+    border-right: 1px solid #333;
+    gap: 10px;
+    /* Espace entre les boutons */
 }
 
-h1.brand small {
-	font-size: 0.7em;
+/* Style des boutons images */
+.planet-btn {
+    width: 60px;
+    /* Taille des boutons */
+    height: 60px;
+    border-radius: 50%;
+    /* Boutons ronds */
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.2s;
+    object-fit: cover;
+    /* S'assure que l'image remplit bien le cercle */
 }
 
-.slider {
-	margin-right: 15px;
+.planet-btn:hover {
+    transform: scale(1.1);
+    border-color: #aaa;
 }
 
-.btn-planet {
-	display: inline;
-	margin: 2% 1% 0 1%;
-	cursor: pointer;
+.planet-btn.active {
+    border-color: #00d2ff;
+    /* Bordure bleue quand actif */
+    box-shadow: 0 0 10px #00d2ff;
 }
 
-.no-padding-left {
-	padding-left: 0;
+#world {
+    flex-grow: 1;
+    /* Prend tout l'espace restant à droite */
+    position: relative;
+    /* Pas de background ici, le canvas le fera */
 }
 
-.no-padding-right {
-	padding-right: 0;
+canvas {
+    display: block;
+    /* Évite les scrollbars fantômes */
 }
 
-.btn-menu {
-	margin-top: 2%;
+/* Bouton Reset spécifique */
+#btn-reset {
+    margin-bottom: 15px;
+    /* Séparation avec les planètes */
+    background-color: #e74c3c;
+    /* Rouge pour "Stop/Reset" */
+    color: white;
+    font-weight: bold;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    border: 2px solid #c0392b;
 }
 
-.btn-default {
-	background-color: darkred;
-	border-color: black;
-}
-
-.slider-handle {
-	background-color: darkred;
-	background-image: -webkit-linear-gradient(top, red 0%, darkred 100%);
-	background-image: -o-linear-gradient(top, red 0%, darkred 100%);
-	background-image: linear-gradient(to bottom, red 0%, darkred 100%);
-	cursor: pointer;
-}
-
-.slider.slider-horizontal {
-	margin-top: 3%;
-	width: 90%;
-}
-
-.navbar-default {
-	background-color: black;
-}
-
-@media(max-width:767px) {
-	#system-article {
-		left: 1%;
-		top: 1%;
-		width: 98%;
-		position: absolute;
-		display: none;
-	}
-	#monitor-article {
-		right: 10%;
-		top: 1%;
-		width: 80%;
-		position: absolute;
-		display: none;
-	}
-}
-
-@media(min-width:768px) {
-	#system-article {
-		left: 1%;
-		top: 1%;
-		width: 98%;
-		position: absolute;
-		display: none;
-	}
-	#monitor-article {
-		right: 5%;
-		top: 1%;
-		width: 40%;
-		position: absolute;
-		display: none;
-	}
-}
-
-@media(min-width:992px) {
-	#system-article {
-		left: 1%;
-		top: 1%;
-		width: 50%;
-		position: absolute;
-	}
-	#monitor-article {
-		right: 1%;
-		top: 1%;
-		width: 30%;
-		position: absolute;
-		display: block;
-	}
-}
-
-@media(min-width:1200px) {
-	#system-article {
-		left: 1%;
-		top: 1%;
-		width: 40%;
-		position: absolute;
-	}
-	#monitor-article {
-		right: 1%;
-		top: 1%;
-		width: 20%;
-		position: absolute;
-		display: block;
-	}
-}
-
-article {
-	z-index: 1000;
-	background-color: black;
-	background-color: rgba(0, 0, 0, 0.1);
-	padding: 10px;
-	cursor: move;
-	border-radius: 10px;
-	border: 3px solid black;
-}
-
-.ui-resizable-handle.ui-resizable-se.ui-icon.ui-icon-gripsmall-diagonal-se {
-	background-color: rgba(255, 50, 50, 0.3);
-}
-
-.blog-link {
-	font-family: 'Reenie Beanie', cursive;
-	font-size: 3em;
-	color: darkred;
-}
-
-a:focus, a:hover {
-	color: red;
-	text-decoration: none;
-	font-weight: bold;
+#btn-reset:hover {
+    background-color: #c0392b;
+    transform: scale(1.1);
 }
