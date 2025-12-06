@@ -1,9 +1,17 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title>SolarSys | Interactive 3D Solar System</title>
+	<meta name="description"
+		content="An immersive 3D visualization of the Solar System built with Three.js. Explore planets and orbits in real-time. Project created by Hyacinthe Hervé.">
+	<meta name="author" content="Hyacinthe Hervé">
+
 	<link rel="stylesheet" href="css/style.css">
+
 	<script type="importmap">
     {
         "imports": {
@@ -22,6 +30,16 @@
 		</nav>
 
 		<div id="world">
+			<button id="btn-credits">© Crédits</button>
+			<div id="credits-modal" class="hidden">
+				<div class="modal-content">
+					<h2>Système Solaire 3D</h2>
+					<p>Créé par <strong>Hyacinthe Hervé</strong></p>
+					<p>Développé avec <a href="https://threejs.org" target="_blank">Three.js</a></p>
+					<p>Textures fournies par la NASA et Solar System Scope.</p>
+					<button id="close-credits">Fermer</button>
+				</div>
+			</div>
 		</div>
 
 	</div>

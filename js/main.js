@@ -7,8 +7,12 @@ const planetsList = ["mercury", "venus", "earth", "mars", "jupiter", "saturn", "
 
 const SETTINGS = {
     speed: 5,
-    scale: 0.5,
-    distanceFactor: 1.5
+
+    // On double la taille visuelle des planètes pour qu'elles restent visibles de loin
+    scale: 1.5,   // (Avant c'était 0.5)
+
+    // On écarte BEAUCOUP les planètes (le Soleil va prendre de la place !)
+    distanceFactor: 4.5  // (Avant c'était 1.5)
 };
 
 let renderer, scene, camera, controls, sun;
@@ -29,8 +33,6 @@ function init() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // On vide le conteneur au cas où, et on ajoute le canvas
-    container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
     // 3. Scène
@@ -39,7 +41,7 @@ function init() {
     // 4. Caméra
     // IMPORTANT : L'aspect ratio dépend aussi du conteneur
     camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 1, 100000);
-    camera.position.set(0, 400, 800);
+    camera.position.set(0, 600, 2000);
 
     // 5. Lumières
     // const ambientLight = new THREE.AmbientLight(0x404040, 1);
@@ -52,11 +54,13 @@ function init() {
     createSun();
     loadPlanets();
 
-    // 7. Contrôles
+    // 6. Contrôles : On permet d'aller voir Pluton qui est maintenant très loin
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.maxDistance = 5000;
+
+    // On augmente la distance max de zoom (de 5000 à 20000)
+    controls.maxDistance = 20000;
 
     // 8. UI & Events
     setupUI();
@@ -69,42 +73,39 @@ function createSun() {
     const loader = new THREE.TextureLoader();
     const texture = loader.load('img/planisphere/sunmap.jpg');
 
-    // 1. LE VISUEL (La boule)
-    // On passe en MeshBasicMaterial : il ignore les ombres et est toujours visible à 100%
-    const geometry = new THREE.SphereGeometry(80, 64, 64);
+    // 1. LE SOLEIL GÉANT
+    // Rayon passé de 80 à 300
+    const geometry = new THREE.SphereGeometry(300, 64, 64);
     const material = new THREE.MeshBasicMaterial({
         map: texture,
-        color: 0xffffff // Laisse la texture définir la couleur
+        color: 0xffffff
     });
     sun = new THREE.Mesh(geometry, material);
     scene.add(sun);
 
-    // 2. LA SOURCE DE LUMIÈRE (La physique)
-    // Depuis Three.js r155+, l'intensité doit être très élevée pour simuler un astre
-    // Distance à 0 = portée infinie (la lumière ne s'arrête pas brusquement)
-    // Decay à 0 ou 1 aide à ce que la lumière porte loin
-    const sunLight = new THREE.PointLight(0xffffff, 50000, 0);
+    // 2. LA LUMIÈRE (Doit aller plus loin)
+    // On augmente l'intensité car les planètes sont plus loin
+    const sunLight = new THREE.PointLight(0xffffff, 500000, 0);
+
+    // Configuration des ombres pour le soleil géant
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 2048; // Qualité de l'ombre
-    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.bias = -0.0001;
+    sun.add(sunLight);
 
-    sun.add(sunLight); // On attache la lumière au soleil pour qu'elle le suive
-
-    // 3. L'EFFET DE HALO (Le "Glow" magique)
-    // On ajoute un sprite (une image 2D qui fait face à la caméra) par-dessus
-    // Tu peux utiliser une texture de glow générique si tu n'en a pas
+    // 3. LE HALO (Doit être proportionnel au soleil)
     const textureGlow = loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/sprites/glow.png');
-
     const spriteMaterial = new THREE.SpriteMaterial({
         map: textureGlow,
-        color: 0xffaa00, // Couleur orangée pour le halo
+        color: 0xffaa00,
         transparent: true,
-        opacity: 0.7,
-        blending: THREE.AdditiveBlending // Fusionne les couleurs pour un effet lumineux
+        opacity: 0.5, // Un peu plus subtil car très grand
+        blending: THREE.AdditiveBlending
     });
 
     const sprite = new THREE.Sprite(spriteMaterial);
-    sprite.scale.set(400, 400, 1); // Le halo doit être plus grand que le soleil (80*2 = 160, donc 400 c'est bien)
+
+    // Le sprite doit être plus grand que le soleil (300 * 3 ou 4)
+    sprite.scale.set(1000, 1000, 1);
     sun.add(sprite);
 }
 
@@ -166,7 +167,7 @@ function resetView() {
     document.querySelectorAll('.planet-btn').forEach(btn => btn.classList.remove('active'));
 
     // 3. Caméra Reset
-    camera.position.set(0, 400, 800);
+    camera.position.set(0, 600, 2000);
     controls.target.set(0, 0, 0);
     controls.update();
 }
@@ -209,6 +210,36 @@ function setupUI() {
         });
 
         menuContainer.appendChild(img);
+
+        // Dans setupUI()...
+
+        // --- GESTION DES CRÉDITS ---
+        const btnCredits = document.getElementById('btn-credits');
+        const modal = document.getElementById('credits-modal');
+        const btnClose = document.getElementById('close-credits');
+
+        // Ouvrir
+        if (btnCredits) {
+            btnCredits.addEventListener('click', () => {
+                modal.classList.remove('hidden');
+            });
+        }
+
+        // Fermer avec le bouton
+        if (btnClose) {
+            btnClose.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+        }
+
+        // Fermer en cliquant en dehors de la boîte (sur le fond gris)
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
     });
 }
 
