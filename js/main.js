@@ -7,11 +7,7 @@ const planetsList = ["mercury", "venus", "earth", "mars", "jupiter", "saturn", "
 
 const SETTINGS = {
     speed: 5,
-
-    // On double la taille visuelle des planètes pour qu'elles restent visibles de loin
     scale: 1.5,   // (Avant c'était 0.5)
-
-    // On écarte BEAUCOUP les planètes (le Soleil va prendre de la place !)
     distanceFactor: 4.5  // (Avant c'était 1.5)
 };
 
@@ -54,7 +50,7 @@ function init() {
     createSun();
     loadPlanets();
 
-    // 6. Contrôles : On permet d'aller voir Pluton qui est maintenant très loin
+    // 7. Contrôles : On permet d'aller voir Pluton qui est maintenant très loin
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
@@ -133,8 +129,6 @@ function loadPlanets() {
         .catch(err => console.error("Erreur chargement JSON:", err));
 }
 
-// --- DANS MAIN.JS ---
-
 function focusOnPlanet(planet) {
     // Si on avait déjà une planète active différente, on l'éteint d'abord
     if (focusedPlanet && focusedPlanet !== planet) {
@@ -145,9 +139,6 @@ function focusOnPlanet(planet) {
 
     // 1. On allume la lumière "magique" sur la planète cible
     planet.toggleHighlight(true);
-
-    // 2. Titre (optionnel)
-    // ...
 
     // 3. Zoom automatique si besoin
     if (camera.position.distanceTo(planet.mesh.position) > 300) {
@@ -211,8 +202,6 @@ function setupUI() {
 
         menuContainer.appendChild(img);
 
-        // Dans setupUI()...
-
         // --- GESTION DES CRÉDITS ---
         const btnCredits = document.getElementById('btn-credits');
         const modal = document.getElementById('credits-modal');
@@ -242,8 +231,6 @@ function setupUI() {
         }
     });
 }
-
-// ... Le reste de tes fonctions (animate, init, etc.) ...
 
 function onWindowResize() {
     // IMPORTANT : On recalcule par rapport au conteneur #world
