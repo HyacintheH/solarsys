@@ -18,6 +18,9 @@ let focusedPlanet = null;
 let asteroidData = [];
 let kuiperBelt;
 
+let labels = []; // Liste des objets { elementHTML, objet3D, offset }
+let showLabels = false; // État du toggle
+
 function init() {
     // 1. Récupération du conteneur "world" (la zone de droite)
     const container = document.getElementById('world');
@@ -129,6 +132,10 @@ function loadPlanets() {
                 planetObjects.push(planet);
                 scene.add(planet.mesh);
             });
+
+            // --- AJOUT IMPORTANT ICI ---
+            // On attend que les planètes soient chargées pour créer les étiquettes
+            createLabels();
         })
         .catch(err => console.error("Erreur chargement JSON:", err));
 }
@@ -211,6 +218,86 @@ function createKuiperBelt() {
 
     kuiperBelt.instanceMatrix.needsUpdate = true;
     scene.add(kuiperBelt);
+}
+
+function createLabels() {
+    const container = document.getElementById('world');
+
+    // Fonction utilitaire interne pour générer un label
+    function addLabel(name, object3D, radiusOffset = 0) {
+        const div = document.createElement('div');
+        div.className = 'planet-label';
+        div.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+        container.appendChild(div);
+
+        labels.push({
+            element: div,
+            mesh: object3D,
+            // On décale le texte un peu au-dessus de l'objet (rayon + une marge fixe)
+            offsetY: radiusOffset
+        });
+    }
+
+    // 1. Label Soleil
+    if (sun) addLabel("Soleil", sun, 400); // 300 (rayon) + 100 marge
+
+    // 2. Labels Planètes
+    planetObjects.forEach(p => {
+        // p.mesh est le groupe, p.visualRadius est stocké dans l'objet Planet
+        // On ajoute une marge proportionnelle à la taille
+        addLabel(p.data.name, p.mesh, p.visualRadius + 50);
+    });
+
+    // 3. Label Ceinture de Kuiper
+    // Astuce : La ceinture est un anneau entier. On va créer un objet invisible
+    // qui tourne avec elle pour accrocher le texte dessus.
+    if (kuiperBelt) {
+        const dummyLabelPoint = new THREE.Object3D();
+        // On le place sur le bord extérieur de la ceinture
+        dummyLabelPoint.position.set(90000, 0, 0);
+        kuiperBelt.add(dummyLabelPoint); // Il tournera avec la ceinture
+
+        addLabel("Ceinture de Kuiper", dummyLabelPoint, 2000);
+    }
+}
+
+function updateLabelsPosition() {
+    // Si désactivé, on ne calcule rien pour économiser le CPU
+    if (!showLabels) return;
+
+    // Pour projeter les coordonnées
+    const tempV = new THREE.Vector3();
+    const container = document.getElementById('world');
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    labels.forEach(item => {
+        // 1. Récupérer la position globale de l'objet 3D
+        // (Nécessaire car les planètes sont dans des groupes ou tournent)
+        item.mesh.updateWorldMatrix(true, false);
+        item.mesh.getWorldPosition(tempV);
+
+        // 2. Ajouter l'offset (pour que le texte flotte au-dessus, pas dedans)
+        tempV.y += item.offsetY;
+
+        // 3. Projection 3D -> 2D (Coordonnées normalisées entre -1 et 1)
+        tempV.project(camera);
+
+        // 4. Vérifier si l'objet est devant la caméra
+        // (z < 1 signifie qu'il est devant le plan de clipping arrière)
+        if (Math.abs(tempV.z) < 1) {
+            // Conversion en pixels CSS
+            const x = (tempV.x * .5 + .5) * width;
+            const y = (tempV.y * -.5 + .5) * height;
+
+            // Application au DOM
+            item.element.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
+            item.element.style.display = 'block';
+        } else {
+            // Si c'est derrière la caméra, on cache
+            item.element.style.display = 'none';
+        }
+    });
 }
 
 function animateAsteroids() {
@@ -331,35 +418,63 @@ function setupUI() {
         });
 
         menuContainer.appendChild(img);
-
-        // --- GESTION DES CRÉDITS ---
-        const btnCredits = document.getElementById('btn-credits');
-        const modal = document.getElementById('credits-modal');
-        const btnClose = document.getElementById('close-credits');
-
-        // Ouvrir
-        if (btnCredits) {
-            btnCredits.addEventListener('click', () => {
-                modal.classList.remove('hidden');
-            });
-        }
-
-        // Fermer avec le bouton
-        if (btnClose) {
-            btnClose.addEventListener('click', () => {
-                modal.classList.add('hidden');
-            });
-        }
-
-        // Fermer en cliquant en dehors de la boîte (sur le fond gris)
-        if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.add('hidden');
-                }
-            });
-        }
     });
+
+    // --- AJOUT : SÉPARATEUR ET BOUTON LÉGENDE ---
+
+    // 1. Le séparateur horizontal
+    const hr = document.createElement('hr');
+    hr.className = 'menu-separator';
+    menuContainer.appendChild(hr);
+
+    // 2. Le bouton Toggle Légende
+    const btnLegend = document.createElement('img');
+    btnLegend.src = 'img/btn/btn-legend.png'; // Ton image
+    btnLegend.id = 'btn-toggle-legend';
+    btnLegend.title = "Afficher/Masquer les noms";
+
+    btnLegend.addEventListener('click', () => {
+        showLabels = !showLabels; // On inverse l'état
+        btnLegend.classList.toggle('active'); // Style visuel du bouton
+
+        // On met à jour la visibilité CSS immédiate
+        const allLabels = document.querySelectorAll('.planet-label');
+        allLabels.forEach(lbl => {
+            if (showLabels) lbl.classList.add('visible');
+            else lbl.classList.remove('visible');
+        });
+    });
+
+    menuContainer.appendChild(btnLegend);
+
+    // --- GESTION DES CRÉDITS ---
+    const btnCredits = document.getElementById('btn-credits');
+    const modal = document.getElementById('credits-modal');
+    const btnClose = document.getElementById('close-credits');
+
+    // Ouvrir
+    if (btnCredits) {
+        btnCredits.addEventListener('click', () => {
+            modal.classList.remove('hidden');
+        });
+    }
+
+    // Fermer avec le bouton
+    if (btnClose) {
+        btnClose.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+    }
+
+    // Fermer en cliquant en dehors de la boîte (sur le fond gris)
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+    }
+
 }
 
 function onWindowResize() {
@@ -379,6 +494,8 @@ function animate() {
     animateAsteroids();
 
     planetObjects.forEach(p => p.update());
+
+    updateLabelsPosition();
 
     // Si une planète est sélectionnée, on centre la caméra dessus
     if (focusedPlanet) {
