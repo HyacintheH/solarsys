@@ -133,7 +133,6 @@ function loadPlanets() {
                 scene.add(planet.mesh);
             });
 
-            // --- AJOUT IMPORTANT ICI ---
             // On attend que les planètes soient chargées pour créer les étiquettes
             createLabels();
         })
@@ -251,7 +250,7 @@ function createLabels() {
         // Label de la planète
         addLabel(p.data.name, p.mesh, p.visualRadius + 50);
 
-        // AJOUT : Vérifier s'il y a des satellites et ajouter leurs labels
+        // Vérifier s'il y a des satellites et ajouter leurs labels
         if (p.satellites && p.satellites.length > 0) {
             p.satellites.forEach(sat => {
                 // On met un offset plus petit (30) car la lune est petite
@@ -433,7 +432,7 @@ function setupUI() {
         menuContainer.appendChild(img);
     });
 
-    // --- AJOUT : SÉPARATEUR ET BOUTON LÉGENDE ---
+    // --- SÉPARATEUR ET BOUTON LÉGENDE ---
 
     // 1. Le séparateur horizontal
     const hr = document.createElement('hr');
