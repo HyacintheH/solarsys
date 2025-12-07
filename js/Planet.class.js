@@ -12,6 +12,9 @@ export class Planet {
         // Angle de départ aléatoire sur l'orbite
         this.angle = Math.random() * Math.PI * 2;
 
+        // Liste pour stocker les lunes de cette planète
+        this.satellites = [];
+
         // 1. SURFACE
         this.createSurface();
 
@@ -28,6 +31,11 @@ export class Planet {
         // 4. ANNEAUX (si définis dans le JSON)
         if (this.data.rings) {
             this.createRings();
+        }
+
+        // 5. SATELLITES (Lunes)
+        if (this.data.satellites) {
+            this.createSatellites();
         }
 
         // Inclinaison de la planète (Axial Tilt)
@@ -144,6 +152,58 @@ export class Planet {
         this.mesh.add(rings);
     }
 
+    createSatellites() {
+        const loader = new THREE.TextureLoader();
+
+        this.data.satellites.forEach(satData => {
+            const pivot = new THREE.Group();
+
+            const satRadius = (satData.radius * this.params.scale) / 1000;
+            const geometry = new THREE.SphereGeometry(satRadius, 32, 32);
+
+            // A. MATÉRIAU RÉALISTE (Standard)
+            const realisticMaterial = new THREE.MeshStandardMaterial({
+                map: loader.load(`img/planisphere/${satData.texture}`),
+                bumpMap: satData.bumpMap ? loader.load(`img/planisphere/${satData.bumpMap}`) : null,
+                bumpScale: 0.02,
+                roughness: 0.9,
+                metalness: 0.0
+            });
+
+            // B. MATÉRIAU HIGHLIGHT (Basic - sans ombres)
+            // On le prépare tout de suite
+            const highlightMaterial = new THREE.MeshBasicMaterial({
+                map: realisticMaterial.map, // On reprend la même texture
+                color: 0xbbbbbb // On tinte un peu en gris pour pas que ça flash trop
+            });
+
+            // On démarre avec le matériau réaliste
+            const moonMesh = new THREE.Mesh(geometry, realisticMaterial);
+            moonMesh.castShadow = true;
+            moonMesh.receiveShadow = true;
+
+            moonMesh.position.x = satData.distanceFromParent;
+
+            pivot.add(moonMesh);
+            pivot.rotation.z = 5 * (Math.PI / 180);
+
+            this.mesh.add(pivot);
+
+            // C. STOCKAGE
+            // On stocke les deux matériaux dans l'objet satellite pour pouvoir changer plus tard
+            this.satellites.push({
+                pivot: pivot,
+                mesh: moonMesh,
+                data: satData,
+                angle: Math.random() * Math.PI * 2,
+
+                // On sauvegarde les références aux matériaux
+                realisticMaterial: realisticMaterial,
+                highlightMaterial: highlightMaterial
+            });
+        });
+    }
+
     update() {
         // 1. POSITION (ORBITE)
         this.angle += this.data.speed * this.params.speed * 0.00001;
@@ -163,16 +223,45 @@ export class Planet {
             const cloudSpeed = this.data.clouds.speed || (this.rotationSpeed * 1.2);
             this.cloudsMesh.rotation.y += cloudSpeed;
         }
+
+        // 4. ANIMATION DES SATELLITES
+        if (this.satellites.length > 0) {
+            this.satellites.forEach(sat => {
+                // A. Orbite autour de la planète (on fait tourner le pivot Y)
+                sat.angle += sat.data.speed;
+                sat.pivot.rotation.y = sat.angle;
+
+                // B. Rotation de la lune sur elle-même
+                // (Note: En vrai la Lune est "verrouillée" et montre toujours la même face,
+                // mais pour l'effet visuel 3D, une lente rotation est sympa).
+                sat.mesh.rotation.y += sat.data.rotationSpeed || 0.005;
+            });
+        }
     }
 
     toggleHighlight(isActive) {
-        if (!this.surfaceMesh) return;
-
-        if (isActive) {
-            this.surfaceMesh.material = this.highlightMaterial;
-        } else {
-            this.surfaceMesh.material = this.realisticMaterial;
+        // 1. GESTION DE LA PLANÈTE PRINCIPALE
+        if (this.surfaceMesh) {
+            if (isActive) {
+                this.surfaceMesh.material = this.highlightMaterial;
+            } else {
+                this.surfaceMesh.material = this.realisticMaterial;
+            }
+            this.surfaceMesh.material.needsUpdate = true;
         }
-        this.surfaceMesh.material.needsUpdate = true;
+
+        // 2. GESTION DES SATELLITES (Lunes)
+        if (this.satellites.length > 0) {
+            this.satellites.forEach(sat => {
+                if (isActive) {
+                    // On passe la lune en mode "Lumière magique"
+                    sat.mesh.material = sat.highlightMaterial;
+                } else {
+                    // On repasse en mode "Physique" (Ombres)
+                    sat.mesh.material = sat.realisticMaterial;
+                }
+                sat.mesh.material.needsUpdate = true;
+            });
+        }
     }
 }

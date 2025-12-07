@@ -250,3 +250,14 @@ canvas {
 .planet-label.visible {
     opacity: 1;
 }
+
+/* --- LÉGENDE SPÉCIFIQUE POUR LES SATELLITES --- */
+.satellite-label {
+    font-size: 10px !important;
+    /* Plus petit que les 14px des planètes */
+    color: #cccccc;
+    /* Un blanc un peu plus gris pour hiérarchiser */
+    border-color: rgba(255, 255, 255, 0.2);
+    /* Bordure plus discrète */
+    padding: 2px 5px;
+}

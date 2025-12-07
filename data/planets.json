@@ -19,9 +19,14 @@
                 "map": "earthcloudmap.jpg",
                 "speed": 0.006
             },
-            "satellite": [
+            "satellites": [
                 {
-                    "0": "moon"
+                    "name": "moon",
+                    "radius": 1737.1,
+                    "distanceFromParent": 30,
+                    "speed": 0.02,
+                    "texture": "moonmap.jpg",
+                    "bumpMap": "moonbump.jpg"
                 }
             ]
         },
@@ -39,7 +44,37 @@
             "atmosphere": {
                 "color": "0xffaa88",
                 "opacity": 0.25
-            }
+            },
+            "satellites": [
+                {
+                    "name": "io",
+                    "radius": 1821.6,
+                    "distanceFromParent": 130,
+                    "speed": 0.04,
+                    "texture": "iomap.jpg"
+                },
+                {
+                    "name": "europa",
+                    "radius": 1560.8,
+                    "distanceFromParent": 160,
+                    "speed": 0.035,
+                    "texture": "europamap.jpg"
+                },
+                {
+                    "name": "ganymede",
+                    "radius": 2634.1,
+                    "distanceFromParent": 200,
+                    "speed": 0.025,
+                    "texture": "ganymedemap.jpg"
+                },
+                {
+                    "name": "callisto",
+                    "radius": 2410.3,
+                    "distanceFromParent": 250,
+                    "speed": 0.015,
+                    "texture": "callistomap.jpg"
+                }
+            ]
         },
         {
             "name": "mars",
@@ -55,7 +90,8 @@
             "atmosphere": {
                 "color": "0xff5500",
                 "opacity": 0.2
-            }
+            },
+            "satellites": []
         },
         {
             "name": "mercury",
@@ -87,7 +123,16 @@
             "atmosphere": {
                 "color": "0x4444ff",
                 "opacity": 0.4
-            }
+            },
+            "satellites": [
+                {
+                    "name": "triton",
+                    "radius": 1353.4,
+                    "distanceFromParent": 35,
+                    "speed": -0.02,
+                    "texture": "tritonmap.jpg"
+                }
+            ]
         },
         {
             "name": "pluto",
@@ -103,7 +148,16 @@
             "atmosphere": {
                 "color": "0xaaaaaa",
                 "opacity": 0.1
-            }
+            },
+            "satellites": [
+                {
+                    "name": "charon",
+                    "radius": 606,
+                    "distanceFromParent": 15,
+                    "speed": 0.01,
+                    "texture": "charonmap.jpg"
+                }
+            ]
         },
         {
             "name": "saturn",
@@ -125,7 +179,62 @@
                 "outerRadius": 140220,
                 "texture": "saturnringcolor.jpg",
                 "alphaMap": "saturnringpattern.gif"
-            }
+            },
+            "satellites": [
+                {
+                    "name": "mimas",
+                    "radius": 198,
+                    "distanceFromParent": 22,
+                    "speed": 0.05,
+                    "texture": "mimasmap.jpg"
+                },
+                {
+                    "name": "enceladus",
+                    "radius": 252,
+                    "distanceFromParent": 26,
+                    "speed": 0.045,
+                    "texture": "enceladusmap.jpg"
+                },
+                {
+                    "name": "tethys",
+                    "radius": 531,
+                    "distanceFromParent": 30,
+                    "speed": 0.04,
+                    "texture": "tethysmap.jpg"
+                },
+                {
+                    "name": "dione",
+                    "radius": 561,
+                    "distanceFromParent": 35,
+                    "speed": 0.035,
+                    "texture": "dionemap.jpg"
+                },
+                {
+                    "name": "rhea",
+                    "radius": 763,
+                    "distanceFromParent": 42,
+                    "speed": 0.03,
+                    "texture": "rheamap.jpg"
+                },
+                {
+                    "name": "titan",
+                    "radius": 2574,
+                    "distanceFromParent": 55,
+                    "speed": 0.02,
+                    "texture": "titanmap.jpg",
+                    "atmosphere": {
+                        "color": "0xffaa00",
+                        "opacity": 0.4
+                    }
+                },
+                {
+                    "name": "iapetus",
+                    "radius": 734,
+                    "distanceFromParent": 70,
+                    "speed": 0.01,
+                    "texture": "iapetusmap.jpg"
+                }
+            ]
         },
         {
             "name": "uranus",
@@ -141,7 +250,44 @@
             "atmosphere": {
                 "color": "0x88ffff",
                 "opacity": 0.4
-            }
+            },
+            "satellites": [
+                {
+                    "name": "miranda",
+                    "radius": 235,
+                    "distanceFromParent": 20,
+                    "speed": 0.05,
+                    "texture": "mirandamap.jpg"
+                },
+                {
+                    "name": "ariel",
+                    "radius": 578,
+                    "distanceFromParent": 25,
+                    "speed": 0.04,
+                    "texture": "arielmap.jpg"
+                },
+                {
+                    "name": "umbriel",
+                    "radius": 584,
+                    "distanceFromParent": 30,
+                    "speed": 0.035,
+                    "texture": "umbrielmap.jpg"
+                },
+                {
+                    "name": "titania",
+                    "radius": 788,
+                    "distanceFromParent": 38,
+                    "speed": 0.03,
+                    "texture": "titaniamap.jpg"
+                },
+                {
+                    "name": "oberon",
+                    "radius": 761,
+                    "distanceFromParent": 45,
+                    "speed": 0.025,
+                    "texture": "oberonmap.jpg"
+                }
+            ]
         },
         {
             "name": "venus",

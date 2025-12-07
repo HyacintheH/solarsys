@@ -223,40 +223,53 @@ function createKuiperBelt() {
 function createLabels() {
     const container = document.getElementById('world');
 
-    // Fonction utilitaire interne pour générer un label
-    function addLabel(name, object3D, radiusOffset = 0) {
+    // Mise à jour de la fonction interne : ajout du paramètre 'isSatellite'
+    function addLabel(name, object3D, radiusOffset = 0, isSatellite = false) {
         const div = document.createElement('div');
+
+        // On garde la classe de base, et on ajoute la classe 'satellite-label' si besoin
         div.className = 'planet-label';
+        if (isSatellite) {
+            div.classList.add('satellite-label');
+        }
+
         div.textContent = name.charAt(0).toUpperCase() + name.slice(1);
         container.appendChild(div);
 
         labels.push({
             element: div,
             mesh: object3D,
-            // On décale le texte un peu au-dessus de l'objet (rayon + une marge fixe)
             offsetY: radiusOffset
         });
     }
 
     // 1. Label Soleil
-    if (sun) addLabel("Soleil", sun, 400); // 300 (rayon) + 100 marge
+    if (sun) addLabel("Soleil", sun, 400);
 
-    // 2. Labels Planètes
+    // 2. Labels Planètes ET Satellites
     planetObjects.forEach(p => {
-        // p.mesh est le groupe, p.visualRadius est stocké dans l'objet Planet
-        // On ajoute une marge proportionnelle à la taille
+        // Label de la planète
         addLabel(p.data.name, p.mesh, p.visualRadius + 50);
+
+        // AJOUT : Vérifier s'il y a des satellites et ajouter leurs labels
+        if (p.satellites && p.satellites.length > 0) {
+            p.satellites.forEach(sat => {
+                // On met un offset plus petit (30) car la lune est petite
+                // Et on passe 'true' pour dire que c'est un satellite (texte petit)
+                addLabel(sat.data.name, sat.mesh, 30, true);
+            });
+        }
     });
 
     // 3. Label Ceinture de Kuiper
-    // Astuce : La ceinture est un anneau entier. On va créer un objet invisible
-    // qui tourne avec elle pour accrocher le texte dessus.
     if (kuiperBelt) {
+        // ... (ton code existant pour récupérer le dummyLabelPoint)
+        // Si tu ne l'as pas stocké globalement, il faut le retrouver ou le recréer ici
+        // Mais idéalement, garde la logique que tu avais faite précédemment.
+        // Si besoin, voici le code simplifié :
         const dummyLabelPoint = new THREE.Object3D();
-        // On le place sur le bord extérieur de la ceinture
         dummyLabelPoint.position.set(90000, 0, 0);
-        kuiperBelt.add(dummyLabelPoint); // Il tournera avec la ceinture
-
+        kuiperBelt.add(dummyLabelPoint);
         addLabel("Ceinture de Kuiper", dummyLabelPoint, 2000);
     }
 }
