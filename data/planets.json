@@ -5,14 +5,28 @@
             "radius": 6378.1,
             "aphelion": 152100000,
             "perihelion": 147095000,
-            "speed":  29.78,
-            "inclination": 7.155,
-            "axial_tilt": 23.4392811,
-            "period": 0.99726968,
-            "way": "forward",
-            "satellite":[
+            "speed": 29.78,
+            "rotationSpeed": 0.005,
+            "material": {
+                "roughness": 0.8,
+                "metalness": 0.1
+            },
+            "atmosphere": {
+                "color": "0x00aaff",
+                "opacity": 0.3
+            },
+            "clouds": {
+                "map": "earthcloudmap.jpg",
+                "speed": 0.006
+            },
+            "satellites": [
                 {
-                    "0": "moon"
+                    "name": "moon",
+                    "radius": 1737.1,
+                    "distanceFromParent": 30,
+                    "speed": 0.02,
+                    "texture": "moonmap.jpg",
+                    "bumpMap": "moonbump.jpg"
                 }
             ]
         },
@@ -22,10 +36,45 @@
             "aphelion": 816040000,
             "perihelion": 740550000,
             "speed": 13.07,
-            "inclination": 6.09,
-            "axial_tilt": 3.13,
-            "period": 9.925,
-            "way": "forward"
+            "rotationSpeed": 0.02,
+            "material": {
+                "roughness": 0.4,
+                "metalness": 0.1
+            },
+            "atmosphere": {
+                "color": "0xffaa88",
+                "opacity": 0.25
+            },
+            "satellites": [
+                {
+                    "name": "io",
+                    "radius": 1821.6,
+                    "distanceFromParent": 130,
+                    "speed": 0.04,
+                    "texture": "iomap.jpg"
+                },
+                {
+                    "name": "europa",
+                    "radius": 1560.8,
+                    "distanceFromParent": 160,
+                    "speed": 0.035,
+                    "texture": "europamap.jpg"
+                },
+                {
+                    "name": "ganymede",
+                    "radius": 2634.1,
+                    "distanceFromParent": 200,
+                    "speed": 0.025,
+                    "texture": "ganymedemap.jpg"
+                },
+                {
+                    "name": "callisto",
+                    "radius": 2410.3,
+                    "distanceFromParent": 250,
+                    "speed": 0.015,
+                    "texture": "callistomap.jpg"
+                }
+            ]
         },
         {
             "name": "mars",
@@ -33,21 +82,32 @@
             "aphelion": 249200000,
             "perihelion": 206700000,
             "speed": 24.077,
-            "inclination": 5.65,
-            "axial_tilt": 25.19,
-            "period": 1.025957,
-            "way": "forward"
+            "rotationSpeed": 0.005,
+            "material": {
+                "roughness": 0.9,
+                "metalness": 0.05
+            },
+            "atmosphere": {
+                "color": "0xff5500",
+                "opacity": 0.2
+            },
+            "satellites": []
         },
         {
             "name": "mercury",
-            "radius":2439.7,
+            "radius": 2439.7,
             "aphelion": 69816900,
             "perihelion": 46001200,
-            "speed":  47.362,
-            "inclination": 3.38,
-            "axial_tilt": 0.034,
-            "period": 58.646,
-            "way": "forward"
+            "speed": 47.362,
+            "rotationSpeed": 0.001,
+            "material": {
+                "roughness": 1.0,
+                "metalness": 0.0
+            },
+            "atmosphere": {
+                "color": "0xaaaaaa",
+                "opacity": 0.1
+            }
         },
         {
             "name": "neptune",
@@ -55,10 +115,24 @@
             "aphelion": 4540000000,
             "perihelion": 4460000000,
             "speed": 5.43,
-            "inclination": 6.43,
-            "axial_tilt": 28.32,
-            "period": 0.6713,
-            "way": "forward"
+            "rotationSpeed": 0.012,
+            "material": {
+                "roughness": 0.4,
+                "metalness": 0.1
+            },
+            "atmosphere": {
+                "color": "0x4444ff",
+                "opacity": 0.4
+            },
+            "satellites": [
+                {
+                    "name": "triton",
+                    "radius": 1353.4,
+                    "distanceFromParent": 35,
+                    "speed": -0.02,
+                    "texture": "tritonmap.jpg"
+                }
+            ]
         },
         {
             "name": "pluto",
@@ -66,10 +140,24 @@
             "aphelion": 7375930000,
             "perihelion": 4436820000,
             "speed": 4.67,
-            "inclination": 17.16,
-            "axial_tilt": 122.53,
-            "period": 6.387230,
-            "way": "forward"
+            "rotationSpeed": 0.001,
+            "material": {
+                "roughness": 0.9,
+                "metalness": 0.1
+            },
+            "atmosphere": {
+                "color": "0xaaaaaa",
+                "opacity": 0.1
+            },
+            "satellites": [
+                {
+                    "name": "charon",
+                    "radius": 606,
+                    "distanceFromParent": 15,
+                    "speed": 0.01,
+                    "texture": "charonmap.jpg"
+                }
+            ]
         },
         {
             "name": "saturn",
@@ -77,16 +165,76 @@
             "aphelion": 1509000000,
             "perihelion": 1350000000,
             "speed": 9.69,
-            "inclination": 5.51,
-            "axial_tilt": 26.73,
-            "period": 10.55,
-            "way": "forward",
+            "rotationSpeed": 0.018,
+            "material": {
+                "roughness": 0.4,
+                "metalness": 0.1
+            },
+            "atmosphere": {
+                "color": "0xffeeaa",
+                "opacity": 0.3
+            },
             "rings": {
                 "innerRadius": 74500,
                 "outerRadius": 140220,
                 "texture": "saturnringcolor.jpg",
                 "alphaMap": "saturnringpattern.gif"
-            }
+            },
+            "satellites": [
+                {
+                    "name": "mimas",
+                    "radius": 198,
+                    "distanceFromParent": 22,
+                    "speed": 0.05,
+                    "texture": "mimasmap.jpg"
+                },
+                {
+                    "name": "enceladus",
+                    "radius": 252,
+                    "distanceFromParent": 26,
+                    "speed": 0.045,
+                    "texture": "enceladusmap.jpg"
+                },
+                {
+                    "name": "tethys",
+                    "radius": 531,
+                    "distanceFromParent": 30,
+                    "speed": 0.04,
+                    "texture": "tethysmap.jpg"
+                },
+                {
+                    "name": "dione",
+                    "radius": 561,
+                    "distanceFromParent": 35,
+                    "speed": 0.035,
+                    "texture": "dionemap.jpg"
+                },
+                {
+                    "name": "rhea",
+                    "radius": 763,
+                    "distanceFromParent": 42,
+                    "speed": 0.03,
+                    "texture": "rheamap.jpg"
+                },
+                {
+                    "name": "titan",
+                    "radius": 2574,
+                    "distanceFromParent": 55,
+                    "speed": 0.02,
+                    "texture": "titanmap.jpg",
+                    "atmosphere": {
+                        "color": "0xffaa00",
+                        "opacity": 0.4
+                    }
+                },
+                {
+                    "name": "iapetus",
+                    "radius": 734,
+                    "distanceFromParent": 70,
+                    "speed": 0.01,
+                    "texture": "iapetusmap.jpg"
+                }
+            ]
         },
         {
             "name": "uranus",
@@ -94,10 +242,52 @@
             "aphelion": 3008000000,
             "perihelion": 2742000000,
             "speed": 6.80,
-            "inclination": 6.48,
-            "axial_tilt": 97.77,
-            "period": 0.71833,
-            "way": "forward"
+            "rotationSpeed": 0.012,
+            "material": {
+                "roughness": 0.4,
+                "metalness": 0.1
+            },
+            "atmosphere": {
+                "color": "0x88ffff",
+                "opacity": 0.4
+            },
+            "satellites": [
+                {
+                    "name": "miranda",
+                    "radius": 235,
+                    "distanceFromParent": 20,
+                    "speed": 0.05,
+                    "texture": "mirandamap.jpg"
+                },
+                {
+                    "name": "ariel",
+                    "radius": 578,
+                    "distanceFromParent": 25,
+                    "speed": 0.04,
+                    "texture": "arielmap.jpg"
+                },
+                {
+                    "name": "umbriel",
+                    "radius": 584,
+                    "distanceFromParent": 30,
+                    "speed": 0.035,
+                    "texture": "umbrielmap.jpg"
+                },
+                {
+                    "name": "titania",
+                    "radius": 788,
+                    "distanceFromParent": 38,
+                    "speed": 0.03,
+                    "texture": "titaniamap.jpg"
+                },
+                {
+                    "name": "oberon",
+                    "radius": 761,
+                    "distanceFromParent": 45,
+                    "speed": 0.025,
+                    "texture": "oberonmap.jpg"
+                }
+            ]
         },
         {
             "name": "venus",
@@ -105,10 +295,15 @@
             "aphelion": 108939000,
             "perihelion": 107477000,
             "speed": 35.02,
-            "inclination": 3.86,
-            "axial_tilt": 2.64,
-            "period": 243.025,
-            "way": "retrograde"
+            "rotationSpeed": -0.001,
+            "material": {
+                "roughness": 0.5,
+                "metalness": 0.1
+            },
+            "atmosphere": {
+                "color": "0xffcc00",
+                "opacity": 0.6
+            }
         }
     ]
 }

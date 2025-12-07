@@ -84,7 +84,7 @@ canvas {
     /* Rouge pour "Stop/Reset" */
     color: white;
     font-weight: bold;
-    font-family: sans-serif;
+    font-family: 'Orbitron', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -115,6 +115,10 @@ canvas {
     padding: 8px 15px;
     border-radius: 20px;
     cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 11px;
+    /* Un peu plus petit pour rester discret */
 }
 
 #btn-credits:hover {
@@ -148,15 +152,20 @@ canvas {
     border-radius: 10px;
     text-align: center;
     color: #eee;
-    font-family: sans-serif;
+    font-family: 'Orbitron', sans-serif;
     border: 1px solid #444;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     max-width: 300px;
+    border: 1px solid #00d2ff;
+    /* Bordure néon bleu */
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
 }
 
 .modal-content h2 {
     margin-top: 0;
     color: #00d2ff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
 .modal-content a {
@@ -165,6 +174,8 @@ canvas {
 }
 
 #close-credits {
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
     margin-top: 20px;
     padding: 8px 20px;
     background: #333;
@@ -176,4 +187,77 @@ canvas {
 
 #close-credits:hover {
     background: #555;
+}
+
+/* --- SÉPARATEUR DANS LE MENU --- */
+.menu-separator {
+    width: 80%;
+    height: 1px;
+    background-color: #444;
+    border: none;
+    margin: 15px 0;
+}
+
+/* --- LE BOUTON LÉGENDE --- */
+#btn-toggle-legend {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    /* Un peu carré comme demandé */
+    cursor: pointer;
+    border: 2px solid #555;
+    transition: all 0.2s;
+    background-color: #222;
+    padding: 5px;
+}
+
+#btn-toggle-legend:hover {
+    border-color: #00d2ff;
+    transform: scale(1.1);
+}
+
+#btn-toggle-legend.active {
+    background-color: #00d2ff;
+    border-color: white;
+}
+
+/* --- LES ÉTIQUETTES (LABELS) --- */
+.planet-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 0 0 5px black, 0 0 10px black;
+    /* Contour noir pour lisibilité */
+    pointer-events: none;
+    /* IMPORTANT : Permet de cliquer à travers le texte */
+    user-select: none;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 2px 6px;
+    border-radius: 4px;
+    opacity: 0;
+    /* Caché par défaut */
+    transition: opacity 0.3s;
+    transform: translate(-50%, -100%);
+    /* Pour centrer le texte au-dessus du point */
+    white-space: nowrap;
+    z-index: 100;
+}
+
+.planet-label.visible {
+    opacity: 1;
+}
+
+/* --- LÉGENDE SPÉCIFIQUE POUR LES SATELLITES --- */
+.satellite-label {
+    font-size: 10px !important;
+    /* Plus petit que les 14px des planètes */
+    color: #cccccc;
+    /* Un blanc un peu plus gris pour hiérarchiser */
+    border-color: rgba(255, 255, 255, 0.2);
+    /* Bordure plus discrète */
+    padding: 2px 5px;
 }
