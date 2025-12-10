@@ -260,4 +260,5 @@ canvas {
     border-color: rgba(255, 255, 255, 0.2);
     /* Bordure plus discrète */
     padding: 2px 5px;
+    pointer-events: none;
 }

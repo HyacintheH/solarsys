@@ -1,267 +1,447 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 export class Planet {
-    constructor(data, params) {
-        this.data = data;
-        this.params = params;
-        this.mesh = new THREE.Group();
+  constructor(data, scalingSystem) {
+    this.data = data;
+    this.scales = scalingSystem; // On stocke les outils de conversion
+    this.mesh = new THREE.Group();
 
-        // Valeurs par défaut si absentes du JSON
-        this.rotationSpeed = this.data.rotationSpeed || 0.005;
+    // --- 1. CALCULS DES PROPRIÉTÉS VISUELLES ---
 
-        // Angle de départ aléatoire sur l'orbite
-        this.angle = Math.random() * Math.PI * 2;
-
-        // Liste pour stocker les lunes de cette planète
-        this.satellites = [];
-
-        // 1. SURFACE
-        this.createSurface();
-
-        // 2. ATMOSPHÈRE (si définie dans le JSON)
-        if (this.data.atmosphere) {
-            this.createAtmosphere();
-        }
-
-        // 3. NUAGES (si définis dans le JSON)
-        if (this.data.clouds) {
-            this.createClouds();
-        }
-
-        // 4. ANNEAUX (si définis dans le JSON)
-        if (this.data.rings) {
-            this.createRings();
-        }
-
-        // 5. SATELLITES (Lunes)
-        if (this.data.satellites) {
-            this.createSatellites();
-        }
-
-        // Inclinaison de la planète (Axial Tilt)
-        // Conversion Degrés -> Radians
-        if (this.data.axial_tilt) {
-            this.mesh.rotation.z = this.data.axial_tilt * (Math.PI / 180);
-        }
+    // On force l'existence des propriétés critiques avant de calculer quoi que ce soit
+    if (!this.data.radius_km || isNaN(this.data.radius_km)) {
+      console.error(
+        `❌ CRITICAL DATA ERROR: Radius missing for ${this.data.name}.`
+      );
+      this.data.radius_km = 1188; // Taille de Pluton par défaut
     }
 
-    createSurface() {
-        const loader = new THREE.TextureLoader();
+    // On s'assure que distance_from_sun_km existe aussi pour éviter NaN sur la position
+    if (isNaN(this.data.distance_from_sun_km)) {
+      this.data.distance_from_sun_km = 5900000000;
+    }
 
-        // Calcul taille visuelle
-        this.visualRadius = (this.data.radius * this.params.scale) / 1000;
-        const geometry = new THREE.SphereGeometry(this.visualRadius, 64, 64);
+    // --- MAINTENANT ON CALCULE LES ÉCHELLES ---
+    this.visualRadius = this.scales.radius(Number(this.data.radius_km));
+    this.semiMajorAxisKm = Number(this.data.distance_from_sun_km);
 
-        // Récupération des propriétés du matériau depuis le JSON (ou valeurs par défaut)
-        const matProps = this.data.material || {};
-        const roughness = matProps.roughness !== undefined ? matProps.roughness : 0.8;
-        const metalness = matProps.metalness !== undefined ? matProps.metalness : 0.1;
+    // EXTRA SAFETY: If scaling returns NaN (e.g. scale factor is 0/undefined)
+    if (isNaN(this.visualRadius)) {
+      console.error(
+        `❌ SCALING ERROR: Visual radius is NaN for ${this.data.name}.`
+      );
+      this.visualRadius = 1; // Minimum safe visual size
+    }
 
-        // --- MATÉRIAU 1 : RÉALISTE (Standard PBR) ---
-        this.realisticMaterial = new THREE.MeshStandardMaterial({
-            map: loader.load(`img/planisphere/${this.data.name}map.jpg`),
-            bumpMap: loader.load(`img/planisphere/${this.data.name}bump.jpg`),
-            bumpScale: 0.05,
-            roughness: roughness,
-            metalness: metalness,
+    // Distance au Soleil (ou au parent si c'est une lune)
+    // Note: La position sera calculée dans update()
+    this.orbitDistance = this.scales.distance(this.data.distance_from_sun_km);
+
+    // Vitesses
+    this.orbitSpeed = this.scales.orbitalSpeed(this.data.orbital_period_days);
+    this.rotationSpeed = this.scales.rotationSpeed(
+      this.data.rotation_period_hours
+    );
+
+    // Position initiale aléatoire
+    this.angle = Math.random() * Math.PI * 2;
+
+    // Inclinaison (Axial Tilt)
+    // Conversion Degrés -> Radians
+    this.mesh.rotation.z = this.data.axial_tilt_deg * (Math.PI / 180);
+
+    // On récupère l'excentricité (0 par défaut si non précisé, donc cercle)
+    this.eccentricity = this.data.eccentricity || 0;
+
+    // --- 2. CONSTRUCTION ---
+    this.createSurface();
+
+    // On vérifie les "Features" dans le JSON
+    if (this.data.features) {
+      if (this.data.features.atmosphere) this.createAtmosphere();
+      if (this.data.features.clouds) this.createClouds();
+      if (this.data.features.rings) this.createRings();
+      if (this.data.features.emissive) this.makeEmissive(); // Pour le Soleil
+    }
+
+    // Satellites
+    this.satellites = [];
+    if (this.data.satellites) {
+      this.createSatellites();
+    }
+
+    // --- 3. PRÉPARATION DE L'ORBITE (TRAÎNÉE) ---
+    this.orbitPointsCount = 0;
+    // On prévoit un buffer large (ex: 5000 points) pour faire un tour complet
+    this.maxOrbitPoints = 10000;
+
+    // Création de la géométrie vide
+    const geometry = new THREE.BufferGeometry();
+    // Tableau stockant les positions (x, y, z) * maxPoints
+    const positions = new Float32Array(this.maxOrbitPoints * 3);
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setDrawRange(0, 0); // Rien à dessiner au début
+
+    // Matériau de la ligne (Gris discret, un peu transparent)
+    const material = new THREE.LineBasicMaterial({
+      color: 0xffffff,
+      opacity: 0.3,
+      transparent: true,
+    });
+
+    this.orbitLine = new THREE.Line(geometry, material);
+
+    // IMPORTANT : On ne l'ajoute pas à "this.mesh" (qui bouge),
+    // mais on le laisse dispo pour l'ajouter à la scène principale.
+    // On désactive le frustumCulled pour éviter que la ligne disparaisse sous certains angles
+    this.orbitLine.frustumCulled = false;
+
+    this.isTracing = false;
+  }
+
+  createSurface() {
+    const loader = new THREE.TextureLoader();
+    const geometry = new THREE.SphereGeometry(this.visualRadius, 64, 64);
+
+    let material;
+
+    // --- SAFEGUARD: Check if texture data exists ---
+    // If this.data.texture is undefined, we use a placeholder "Error Material"
+    if (!this.data.texture || !this.data.texture.map) {
+      console.warn(
+        `⚠️ Texture missing for: ${this.data.name || "Unknown Planet"}`
+      );
+      material = new THREE.MeshBasicMaterial({
+        color: 0xff0000,
+        wireframe: true,
+      });
+    } else {
+      // Normal Logic if texture exists
+      const texturePath = `img/planisphere/${this.data.texture.map}`;
+
+      if (this.data.type === "star") {
+        material = new THREE.MeshBasicMaterial({
+          map: loader.load(`img/planisphere/${this.data.texture.map}`),
+          color: 0xffffff,
         });
 
-        // --- MATÉRIAU 2 : HIGHLIGHT (Basic sans ombres) ---
-        this.highlightMaterial = new THREE.MeshBasicMaterial({
-            map: this.realisticMaterial.map,
-            color: 0x888888
+        // --- CORRECTION LUMIÈRE ---
+        // Paramètres : Couleur, Intensité, Distance Max, Decay (Atténuation)
+
+        // 1. Intensité : 2 ou 3 (suffisant si le decay est à 0)
+        // 2. Distance : 0 = Infini (la lumière porte jusqu'au bout de la scène)
+        // 3. Decay : 0 = Pas d'atténuation physique. La lumière ne faiblit pas avec la distance.
+
+        const sunLight = new THREE.PointLight(0xffffff, 2.5, 0, 0);
+
+        sunLight.castShadow = true;
+
+        // Optimisation des ombres (optionnel mais conseillé pour éviter les artefacts)
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.bias = -0.0001;
+
+        this.mesh.add(sunLight);
+      } else {
+        const isGas =
+          this.data.type === "gas_giant" || this.data.type === "ice_giant";
+
+        material = new THREE.MeshLambertMaterial({
+          map: loader.load(texturePath),
+          // Lambert n'a pas de roughness/metalness, il réagit juste à la lumière
+          // C'est souvent mieux pour les planètes si on n'a pas de normal maps complexes
         });
 
-        this.surfaceMesh = new THREE.Mesh(geometry, this.realisticMaterial);
-        this.surfaceMesh.castShadow = true;
-        this.surfaceMesh.receiveShadow = true;
-
-        this.mesh.add(this.surfaceMesh);
-    }
-
-    createAtmosphere() {
-        const atmoData = this.data.atmosphere;
-
-        // Géométrie un peu plus grande
-        const geometry = new THREE.SphereGeometry(this.visualRadius + 0.2, 64, 64);
-
-        // Conversion couleur string hex -> Three Color
-        const color = new THREE.Color(parseInt(atmoData.color, 16));
-
-        const material = new THREE.MeshPhongMaterial({
-            color: color,
-            transparent: true,
-            opacity: atmoData.opacity || 0.3,
-            side: THREE.BackSide,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false
-        });
-
-        const atmosphere = new THREE.Mesh(geometry, material);
-        this.mesh.add(atmosphere);
-    }
-
-    createClouds() {
-        const cloudData = this.data.clouds;
-        const loader = new THREE.TextureLoader();
-
-        const geometry = new THREE.SphereGeometry(this.visualRadius + 0.05, 64, 64);
-
-        const material = new THREE.MeshStandardMaterial({
-            map: loader.load(`img/planisphere/${cloudData.map}`),
-            transparent: true,
-            opacity: 0.8,
-            blending: THREE.AdditiveBlending,
-            side: THREE.DoubleSide
-        });
-
-        this.cloudsMesh = new THREE.Mesh(geometry, material);
-        this.mesh.add(this.cloudsMesh);
-    }
-
-    createRings() {
-        const ringData = this.data.rings;
-        const loader = new THREE.TextureLoader();
-
-        const scaleFactor = this.visualRadius / this.data.radius;
-        const innerRadius = ringData.innerRadius * scaleFactor;
-        const outerRadius = ringData.outerRadius * scaleFactor;
-
-        const geometry = new THREE.RingGeometry(innerRadius, outerRadius, 128);
-
-        const material = new THREE.MeshStandardMaterial({
-            map: loader.load(`img/planisphere/${ringData.texture}`),
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.8,
-            roughness: 0.5,
-            metalness: 0.1
-        });
-
-        if (ringData.alphaMap) {
-            material.alphaMap = loader.load(`img/planisphere/${ringData.alphaMap}`);
-            material.alphaTest = 0.1;
+        // Check for bump map specifically
+        if (this.data.texture.bump) {
+          material.bumpMap = loader.load(
+            `img/planisphere/${this.data.texture.bump}`
+          );
+          material.bumpScale = 0.05;
         }
-
-        const rings = new THREE.Mesh(geometry, material);
-        // Les anneaux sont "à plat" par défaut, on les tourne pour correspondre au plan équatorial
-        rings.rotation.x = -Math.PI / 2;
-        rings.receiveShadow = true;
-        rings.castShadow = true;
-
-        this.mesh.add(rings);
+      }
     }
 
-    createSatellites() {
-        const loader = new THREE.TextureLoader();
+    // Matériaux pour le Highlight
+    this.realisticMaterial = material;
+    this.highlightMaterial = new THREE.MeshBasicMaterial({
+      // If the map exists use it, otherwise use grey color
+      map: material.map || null,
+      color: material.map ? 0xbbbbbb : 0x888888,
+    });
 
-        this.data.satellites.forEach(satData => {
-            const pivot = new THREE.Group();
+    this.surfaceMesh = new THREE.Mesh(geometry, material);
 
-            const satRadius = (satData.radius * this.params.scale) / 1000;
-            const geometry = new THREE.SphereGeometry(satRadius, 32, 32);
-
-            // A. MATÉRIAU RÉALISTE (Standard)
-            const realisticMaterial = new THREE.MeshStandardMaterial({
-                map: loader.load(`img/planisphere/${satData.texture}`),
-                bumpMap: satData.bumpMap ? loader.load(`img/planisphere/${satData.bumpMap}`) : null,
-                bumpScale: 0.02,
-                roughness: 0.9,
-                metalness: 0.0
-            });
-
-            // B. MATÉRIAU HIGHLIGHT (Basic - sans ombres)
-            // On le prépare tout de suite
-            const highlightMaterial = new THREE.MeshBasicMaterial({
-                map: realisticMaterial.map, // On reprend la même texture
-                color: 0xbbbbbb // On tinte un peu en gris pour pas que ça flash trop
-            });
-
-            // On démarre avec le matériau réaliste
-            const moonMesh = new THREE.Mesh(geometry, realisticMaterial);
-            moonMesh.castShadow = true;
-            moonMesh.receiveShadow = true;
-
-            moonMesh.position.x = satData.distanceFromParent;
-
-            pivot.add(moonMesh);
-            pivot.rotation.z = 5 * (Math.PI / 180);
-
-            this.mesh.add(pivot);
-
-            // C. STOCKAGE
-            // On stocke les deux matériaux dans l'objet satellite pour pouvoir changer plus tard
-            this.satellites.push({
-                pivot: pivot,
-                mesh: moonMesh,
-                data: satData,
-                angle: Math.random() * Math.PI * 2,
-
-                // On sauvegarde les références aux matériaux
-                realisticMaterial: realisticMaterial,
-                highlightMaterial: highlightMaterial
-            });
-        });
+    if (this.data.type !== "star") {
+      this.surfaceMesh.castShadow = true;
+      this.surfaceMesh.receiveShadow = true;
     }
 
-    update() {
-        // 1. POSITION (ORBITE)
-        this.angle += this.data.speed * this.params.speed * 0.00001;
-        const distanceVisual = (this.data.aphelion / 1000000) * this.params.distanceFactor;
+    this.mesh.add(this.surfaceMesh);
+  }
 
-        this.mesh.position.x = Math.cos(this.angle) * distanceVisual;
-        this.mesh.position.z = Math.sin(this.angle) * distanceVisual;
+  createAtmosphere() {
+    const params = this.data.features.atmosphere;
+    const geometry = new THREE.SphereGeometry(this.visualRadius * 1.05, 64, 64);
+    const material = new THREE.MeshPhongMaterial({
+      color: new THREE.Color(parseInt(params.color, 16)),
+      transparent: true,
+      opacity: params.opacity,
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    this.mesh.add(new THREE.Mesh(geometry, material));
+  }
 
-        // 2. ROTATION PLANÈTE
-        if (this.surfaceMesh) {
-            this.surfaceMesh.rotation.y += this.rotationSpeed;
-        }
+  createClouds() {
+    const params = this.data.features.clouds;
+    const loader = new THREE.TextureLoader();
+    const geometry = new THREE.SphereGeometry(this.visualRadius * 1.02, 64, 64);
+    const material = new THREE.MeshStandardMaterial({
+      map: loader.load(`img/planisphere/${params.map}`),
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
+    });
+    this.cloudsMesh = new THREE.Mesh(geometry, material);
+    this.mesh.add(this.cloudsMesh);
+  }
 
-        // 3. ROTATION NUAGES (Si existent)
-        if (this.cloudsMesh && this.data.clouds) {
-            // Vitesse spécifique définie dans le JSON, ou un peu plus vite par défaut
-            const cloudSpeed = this.data.clouds.speed || (this.rotationSpeed * 1.2);
-            this.cloudsMesh.rotation.y += cloudSpeed;
-        }
+  createRings() {
+    const params = this.data.features.rings;
+    const loader = new THREE.TextureLoader();
 
-        // 4. ANIMATION DES SATELLITES
-        if (this.satellites.length > 0) {
-            this.satellites.forEach(sat => {
-                // A. Orbite autour de la planète (on fait tourner le pivot Y)
-                sat.angle += sat.data.speed;
-                sat.pivot.rotation.y = sat.angle;
+    // Conversion des rayons réels (km) avec l'échelle de rayon
+    const inner = this.scales.radius(params.inner_radius_km);
+    const outer = this.scales.radius(params.outer_radius_km);
 
-                // B. Rotation de la lune sur elle-même
-                // (Note: En vrai la Lune est "verrouillée" et montre toujours la même face,
-                // mais pour l'effet visuel 3D, une lente rotation est sympa).
-                sat.mesh.rotation.y += sat.data.rotationSpeed || 0.005;
-            });
-        }
+    const geometry = new THREE.RingGeometry(inner, outer, 128);
+    const material = new THREE.MeshStandardMaterial({
+      map: loader.load(`img/planisphere/${params.map}`),
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.8,
+    });
+
+    if (params.alpha) {
+      material.alphaMap = loader.load(`img/planisphere/${params.alpha}`);
+      material.alphaTest = 0.1;
     }
 
-    toggleHighlight(isActive) {
-        // 1. GESTION DE LA PLANÈTE PRINCIPALE
-        if (this.surfaceMesh) {
-            if (isActive) {
-                this.surfaceMesh.material = this.highlightMaterial;
-            } else {
-                this.surfaceMesh.material = this.realisticMaterial;
-            }
-            this.surfaceMesh.material.needsUpdate = true;
-        }
+    const rings = new THREE.Mesh(geometry, material);
+    rings.rotation.x = -Math.PI / 2;
+    rings.castShadow = true;
+    rings.receiveShadow = true;
+    this.mesh.add(rings);
+  }
 
-        // 2. GESTION DES SATELLITES (Lunes)
-        if (this.satellites.length > 0) {
-            this.satellites.forEach(sat => {
-                if (isActive) {
-                    // On passe la lune en mode "Lumière magique"
-                    sat.mesh.material = sat.highlightMaterial;
-                } else {
-                    // On repasse en mode "Physique" (Ombres)
-                    sat.mesh.material = sat.realisticMaterial;
-                }
-                sat.mesh.material.needsUpdate = true;
-            });
-        }
+  makeEmissive() {
+    // Safety check
+    if (!this.surfaceMesh) return;
+
+    const material = this.surfaceMesh.material;
+
+    // Case 1: Standard Material (e.g., a planet with lava, city lights, or just slightly glowing)
+    // We set the emissive property so the texture glows in the dark.
+    if (material.isMeshStandardMaterial) {
+      material.emissiveMap = material.map; // Use the texture as the emission map
+      material.emissive = new THREE.Color(0xffffff); // White emission color (full brightness of the texture)
+      material.emissiveIntensity = 1; // Strength of the glow
     }
+  }
+
+  createSatellites() {
+    const loader = new THREE.TextureLoader();
+
+    this.data.satellites.forEach((satData) => {
+      // --- SÉCURITÉ 1 : Validation du Rayon ---
+      let safeRadiusKm = satData.radius_km;
+      if (!safeRadiusKm || isNaN(safeRadiusKm)) {
+        console.warn(
+          `⚠️ Satellite Radius missing for moon of ${this.data.name}. Defaulting to 200km.`
+        );
+        safeRadiusKm = 200; // Valeur par défaut
+      }
+
+      // --- SÉCURITÉ 2 : Validation de la Texture ---
+      let mapTexture;
+      if (satData.texture && satData.texture.map) {
+        mapTexture = loader.load(`img/planisphere/${satData.texture.map}`);
+      } else {
+        console.warn(
+          `⚠️ Satellite Texture missing for moon of ${this.data.name}. Using grey fallback.`
+        );
+        // Pas de texture = on laisse null, le matériau sera juste gris/blanc
+        mapTexture = null;
+      }
+
+      // Pivot pour l'orbite
+      const pivot = new THREE.Group();
+
+      // Calculs via le système d'échelle
+      let rad = this.scales.radius(safeRadiusKm);
+      if (isNaN(rad)) rad = 0.5; // Ultime sécurité si l'échelle renvoie NaN
+
+      const dist = this.scales.satelliteDistance(
+        satData.distance_from_parent_km
+      );
+
+      const geo = new THREE.SphereGeometry(rad, 32, 32); // C'est ici que ça plantait (32 segments)
+
+      const mat = new THREE.MeshStandardMaterial({
+        map: mapTexture,
+        color: mapTexture ? 0xffffff : 0x888888, // Gris si pas de texture
+        roughness: 0.9,
+      });
+
+      // Matériaux Highlight/Realistic pour la lune aussi
+      const highMat = new THREE.MeshBasicMaterial({
+        map: mapTexture,
+        color: mapTexture ? 0xbbbbbb : 0xff0000, // Rouge si pas de texture en mode highlight
+      });
+
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.x = dist;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+
+      pivot.add(mesh);
+      this.mesh.add(pivot);
+
+      // Stockage pour update
+      this.satellites.push({
+        data: satData, // IMPORTANT : On stocke les data pour les Labels !
+        pivot: pivot,
+        mesh: mesh,
+        angle: Math.random() * Math.PI * 2,
+        speed: this.scales.orbitalSpeed(satData.orbital_period_days) * 10,
+        rotSpeed: this.scales.rotationSpeed(
+          satData.rotation_period_hours || 100
+        ),
+        realisticMaterial: mat,
+        highlightMaterial: highMat,
+      });
+    });
+  }
+
+  update() {
+    // 1. POSITION ORBITALE (KEPLER CORRIGÉ POUR LOGARITHMIQUE)
+    if (this.semiMajorAxisKm > 0) {
+      const e = this.eccentricity;
+
+      // A. Calcul de l'angle (Anomalie vraie)
+      // On garde la logique de vitesse précédente
+      // Note: Pour être physiquement parfait, la vitesse devrait varier selon r,
+      // mais pour une visualisation fluide, une vitesse moyenne ou ajustée suffit ici.
+      this.angle += this.orbitSpeed;
+
+      // B. Calcul du rayon RÉEL en km (Formule polaire de l'ellipse)
+      // r = a(1-e^2) / (1 + e*cos(theta))
+      const r_km =
+        (this.semiMajorAxisKm * (1 - e * e)) / (1 + e * Math.cos(this.angle));
+
+      // C. Conversion du rayon réel en rayon VISUEL (Logarithmique)
+      // On appelle la fonction de scale ici, à chaque frame
+      const currentVisualRadius = this.scales.distance(r_km);
+
+      // D. Mise à jour de la position
+      this.mesh.position.x = Math.cos(this.angle) * currentVisualRadius;
+      this.mesh.position.z = Math.sin(this.angle) * currentVisualRadius;
+
+      this.updateOrbit();
+    }
+
+    // Rotation sur soi-même
+    if (this.surfaceMesh) {
+      this.surfaceMesh.rotation.y += this.rotationSpeed;
+    }
+
+    // Rotation des nuages (un peu plus vite)
+    if (this.cloudsMesh) {
+      this.cloudsMesh.rotation.y += this.rotationSpeed * 1.2;
+    }
+
+    // Satellites
+    if (this.satellites.length > 0) {
+      this.satellites.forEach((sat) => {
+        sat.angle += sat.speed;
+        sat.pivot.rotation.y = sat.angle;
+        sat.mesh.rotation.y += sat.rotSpeed;
+      });
+    }
+  }
+
+  toggleHighlight(isActive) {
+    // 1. GESTION DE LA PLANÈTE PRINCIPALE
+    if (this.surfaceMesh) {
+      if (isActive) {
+        this.surfaceMesh.material = this.highlightMaterial;
+      } else {
+        this.surfaceMesh.material = this.realisticMaterial;
+      }
+      this.surfaceMesh.material.needsUpdate = true;
+    }
+
+    // 2. GESTION DES SATELLITES (Lunes)
+    if (this.satellites.length > 0) {
+      this.satellites.forEach((sat) => {
+        if (isActive) {
+          // On passe la lune en mode "Lumière magique"
+          sat.mesh.material = sat.highlightMaterial;
+        } else {
+          // On repasse en mode "Physique" (Ombres)
+          sat.mesh.material = sat.realisticMaterial;
+        }
+        sat.mesh.material.needsUpdate = true;
+      });
+    }
+  }
+
+  updateOrbit() {
+    if (!this.isTracing) return;
+
+    // Si on a rempli le buffer, on arrête de dessiner (ou on boucle, mais arrêter est plus simple)
+    if (this.orbitPointsCount >= this.maxOrbitPoints) return;
+
+    // On récupère la position actuelle dans le tableau
+    const positions = this.orbitLine.geometry.attributes.position.array;
+
+    // On ajoute x, y, z à l'index courant
+    const index = this.orbitPointsCount * 3;
+    positions[index] = this.mesh.position.x;
+    positions[index + 1] = this.mesh.position.y;
+    positions[index + 2] = this.mesh.position.z;
+
+    this.orbitPointsCount++;
+
+    // On dit à Three.js de dessiner jusqu'à ce point
+    this.orbitLine.geometry.setDrawRange(0, this.orbitPointsCount);
+    // On signale que les données ont changé
+    this.orbitLine.geometry.attributes.position.needsUpdate = true;
+  }
+
+  // Méthode pour activer/désactiver le traçage
+  toggleOrbit(isActive) {
+    this.isTracing = isActive;
+
+    if (isActive) {
+      this.orbitLine.visible = true;
+      // Optionnel : Si tu veux que ça reparte de zéro à chaque fois :
+      // this.orbitPointsCount = 0;
+      // this.orbitLine.geometry.setDrawRange(0, 0);
+
+      // Si tu veux que ça reprenne là où c'était, ne fais rien ici.
+      // Mais pour l'effet "se dessine au fur et à mesure", le reset est mieux :
+      if (this.orbitPointsCount === 0) {
+        // Premier démarrage ou reset
+      }
+    } else {
+      this.orbitLine.visible = false;
+      // On reset pour la prochaine fois
+      this.orbitPointsCount = 0;
+      this.orbitLine.geometry.setDrawRange(0, 0);
+    }
+  }
 }
