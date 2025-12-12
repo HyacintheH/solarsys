@@ -218,7 +218,7 @@ function createStarfield() {
 }
 
 function createKuiperBelt() {
-  const count = 25000;
+  const count = 15000;
 
   // --- CORRECTION ECHELLE ---
   // La ceinture de Kuiper commence après Neptune (~4.5 milliards km)
