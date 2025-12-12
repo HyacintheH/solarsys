@@ -43,8 +43,31 @@ export class Planet {
       this.data.rotation_period_hours
     );
 
-    // Position initiale aléatoire
-    this.angle = Math.random() * Math.PI * 2;
+    // --- CALCUL DE LA POSITION RÉELLE (AUJOURD'HUI) ---
+
+    // 1. Définition de la date de référence (J2000 : 1er Janvier 2000 à midi)
+    const J2000_TIMESTAMP = 946728000000;
+    const now = new Date().getTime();
+
+    // 2. Calcul du nombre de jours écoulés depuis J2000
+    const daysSinceJ2000 = (now - J2000_TIMESTAMP) / (1000 * 60 * 60 * 24);
+
+    // 3. Récupération de la position de départ (J2000) depuis le JSON
+    // Si la donnée manque, on met 0 par défaut
+    const startDeg = this.data.mean_anomaly_deg || Math.random() * 360;
+
+    // 4. Calcul de l'angle actuel
+    // Formule : Position Départ + (Nombre de tours effectués * 360)
+    // Nombre de tours = Jours écoulés / Période orbitale
+    const totalDegrees = startDeg + (daysSinceJ2000 / this.data.orbital_period_days) * 360;
+
+    // 5. Conversion en Radians pour Three.js
+    // On utilise le modulo (%) pour garder un angle propre, même si c'est pas obligatoire pour Math.cos
+    this.angle = (totalDegrees % 360) * (Math.PI / 180);
+
+    // Pour les satellites, on garde l'aléatoire car c'est moins critique visuellement
+    // et on n'a pas les données précises dans le JSON
+    this.satAngleOffset = Math.random() * Math.PI * 2;
 
     // Inclinaison (Axial Tilt)
     // Conversion Degrés -> Radians

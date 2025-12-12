@@ -8,10 +8,17 @@
       "orbital_period_days": 1,
       "rotation_period_hours": 609.12,
       "axial_tilt_deg": 0,
-      "texture": { "map": "sunmap.jpg" },
+      "texture": {
+        "map": "sunmap.jpg"
+      },
       "features": {
-        "emissive": { "color": "0xffff00", "intensity": 1 },
-        "glow": { "color": "0xffaa00" }
+        "emissive": {
+          "color": "0xffff00",
+          "intensity": 1
+        },
+        "glow": {
+          "color": "0xffaa00"
+        }
       }
     },
     {
@@ -22,11 +29,18 @@
       "orbital_period_days": 88,
       "rotation_period_hours": 1407.6,
       "axial_tilt_deg": 0.034,
-      "texture": { "map": "mercurymap.jpg", "bump": "mercurybump.jpg" },
-      "features": {
-        "atmosphere": { "color": "0xaaaaaa", "opacity": 0.05 }
+      "texture": {
+        "map": "mercurymap.jpg",
+        "bump": "mercurybump.jpg"
       },
-      "eccentricity": 0.2056
+      "features": {
+        "atmosphere": {
+          "color": "0xaaaaaa",
+          "opacity": 0.05
+        }
+      },
+      "eccentricity": 0.2056,
+      "mean_anomaly_deg": 174.79
     },
     {
       "name": "venus",
@@ -36,11 +50,17 @@
       "orbital_period_days": 224.7,
       "rotation_period_hours": -5832.5,
       "axial_tilt_deg": 177.3,
-      "texture": { "map": "venusmap.jpg" },
-      "features": {
-        "atmosphere": { "color": "0xffcc00", "opacity": 0.8 }
+      "texture": {
+        "map": "venusmap.jpg"
       },
-      "eccentricity": 0.0068
+      "features": {
+        "atmosphere": {
+          "color": "0xffcc00",
+          "opacity": 0.8
+        }
+      },
+      "eccentricity": 0.0068,
+      "mean_anomaly_deg": 50.11
     },
     {
       "name": "earth",
@@ -50,12 +70,22 @@
       "orbital_period_days": 365.2,
       "rotation_period_hours": 23.9,
       "axial_tilt_deg": 23.4,
-      "texture": { "map": "earthmap.jpg", "bump": "earthbump.jpg" },
+      "texture": {
+        "map": "earthmap.jpg",
+        "bump": "earthbump.jpg"
+      },
       "features": {
-        "atmosphere": { "color": "0x00aaff", "opacity": 0.2 },
-        "clouds": { "map": "earthcloudmap.jpg", "speed_offset": 1.2 }
+        "atmosphere": {
+          "color": "0x00aaff",
+          "opacity": 0.2
+        },
+        "clouds": {
+          "map": "earthcloudmap.jpg",
+          "speed_offset": 1.2
+        }
       },
       "eccentricity": 0.0167,
+      "mean_anomaly_deg": 357.51,
       "satellites": [
         {
           "name": "moon",
@@ -63,7 +93,10 @@
           "distance_from_parent_km": 384400,
           "orbital_period_days": 27.3,
           "rotation_period_hours": 655.7,
-          "texture": { "map": "moonmap.jpg", "bump": "moonbump.jpg" }
+          "texture": {
+            "map": "moonmap.jpg",
+            "bump": "moonbump.jpg"
+          }
         }
       ]
     },
@@ -75,11 +108,18 @@
       "orbital_period_days": 687,
       "rotation_period_hours": 24.6,
       "axial_tilt_deg": 25.19,
-      "texture": { "map": "marsmap.jpg", "bump": "marsbump.jpg" },
-      "features": {
-        "atmosphere": { "color": "0xff5500", "opacity": 0.15 }
+      "texture": {
+        "map": "marsmap.jpg",
+        "bump": "marsbump.jpg"
       },
-      "eccentricity": 0.0934
+      "features": {
+        "atmosphere": {
+          "color": "0xff5500",
+          "opacity": 0.15
+        }
+      },
+      "eccentricity": 0.0934,
+      "mean_anomaly_deg": 19.41
     },
     {
       "name": "jupiter",
@@ -89,25 +129,35 @@
       "orbital_period_days": 4333,
       "rotation_period_hours": 9.9,
       "axial_tilt_deg": 3.13,
-      "texture": { "map": "jupitermap.jpg" },
+      "texture": {
+        "map": "jupitermap.jpg"
+      },
       "features": {
-        "atmosphere": { "color": "0xffaa88", "opacity": 0.2 }
+        "atmosphere": {
+          "color": "0xffaa88",
+          "opacity": 0.2
+        }
       },
       "eccentricity": 0.0484,
+      "mean_anomaly_deg": 20.02,
       "satellites": [
         {
           "name": "io",
           "radius_km": 1821,
           "distance_from_parent_km": 421700,
           "orbital_period_days": 1.76,
-          "texture": { "map": "iomap.jpg" }
+          "texture": {
+            "map": "iomap.jpg"
+          }
         },
         {
           "name": "europa",
           "radius_km": 1560,
           "distance_from_parent_km": 670900,
           "orbital_period_days": 3.55,
-          "texture": { "map": "europamap.jpg" }
+          "texture": {
+            "map": "europamap.jpg"
+          }
         }
       ]
     },
@@ -119,9 +169,14 @@
       "orbital_period_days": 10759,
       "rotation_period_hours": 10.7,
       "axial_tilt_deg": 26.7,
-      "texture": { "map": "saturnmap.jpg" },
+      "texture": {
+        "map": "saturnmap.jpg"
+      },
       "features": {
-        "atmosphere": { "color": "0xffeeaa", "opacity": 0.2 },
+        "atmosphere": {
+          "color": "0xffeeaa",
+          "opacity": 0.2
+        },
         "rings": {
           "inner_radius_km": 74500,
           "outer_radius_km": 140220,
@@ -129,7 +184,8 @@
           "alpha": "saturnringpattern.gif"
         }
       },
-      "eccentricity": 0.0556
+      "eccentricity": 0.0556,
+      "mean_anomaly_deg": 317.02
     },
     {
       "name": "uranus",
@@ -139,11 +195,17 @@
       "orbital_period_days": 30687,
       "rotation_period_hours": -17.2,
       "axial_tilt_deg": 97.7,
-      "texture": { "map": "uranusmap.jpg" },
-      "features": {
-        "atmosphere": { "color": "0x88ffff", "opacity": 0.3 }
+      "texture": {
+        "map": "uranusmap.jpg"
       },
-      "eccentricity": 0.0472
+      "features": {
+        "atmosphere": {
+          "color": "0x88ffff",
+          "opacity": 0.3
+        }
+      },
+      "eccentricity": 0.0472,
+      "mean_anomaly_deg": 142.23
     },
     {
       "name": "neptune",
@@ -153,11 +215,17 @@
       "orbital_period_days": 60190,
       "rotation_period_hours": 16.1,
       "axial_tilt_deg": 28.3,
-      "texture": { "map": "neptunemap.jpg" },
-      "features": {
-        "atmosphere": { "color": "0x4444ff", "opacity": 0.35 }
+      "texture": {
+        "map": "neptunemap.jpg"
       },
-      "eccentricity": 0.0086
+      "features": {
+        "atmosphere": {
+          "color": "0x4444ff",
+          "opacity": 0.35
+        }
+      },
+      "eccentricity": 0.0086,
+      "mean_anomaly_deg": 256.22
     },
     {
       "name": "pluto",
@@ -172,6 +240,7 @@
         "bump": "pluto_bump.jpg"
       },
       "eccentricity": 0.2488,
+      "mean_anomaly_deg": 14.88,
       "satellites": [
         {
           "name": "charon",
