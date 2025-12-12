@@ -64,6 +64,12 @@
     },
     {
       "name": "earth",
+      "info": {
+        "description": "La Terre est la seule planète connue pour abriter la vie. Environ 71 % de sa surface est recouverte d'eau. Son atmosphère protège la planète des météorites et des radiations solaires.",
+        "temp_avg": "15°C",
+        "composition": "Roche et Métal",
+        "image": "https://images-assets.nasa.gov/image/PIA00342/PIA00342~orig.jpg"
+      },
       "type": "rocky",
       "radius_km": 6371,
       "distance_from_sun_km": 149600000,

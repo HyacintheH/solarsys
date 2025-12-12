@@ -486,6 +486,9 @@ function focusOnPlanet(planet) {
   // On dit aux contrôles que le centre de rotation est maintenant la planète
   controls.target.copy(planet.mesh.position);
   controls.update();
+
+  // AFFICHER LE PANNEAU
+  updateInfoPanel(planet.data);
 }
 
 function resetView() {
@@ -505,6 +508,10 @@ function resetView() {
   camera.position.set(0, 2000, 6000);
   controls.target.set(0, 0, 0);
   controls.update();
+
+  // CACHER LE PANNEAU
+  const panel = document.getElementById('planet-info-panel');
+  panel.classList.add('hidden');
 }
 
 // --- CONFIGURATION DE L'INTERFACE (UI) ---
@@ -708,6 +715,43 @@ function updateDateDisplay() {
     // Format français : jour/mois/année
     dateDisplay.textContent = simDate.toLocaleDateString('fr-FR');
   }
+}
+
+function updateInfoPanel(planetData) {
+  const panel = document.getElementById('planet-info-panel');
+  const nameEl = document.getElementById('info-name');
+  const imgEl = document.getElementById('info-img');
+  const descEl = document.getElementById('info-desc');
+  const tempEl = document.getElementById('info-temp');
+  const typeEl = document.getElementById('info-type');
+  const rotEl = document.getElementById('info-rotation');
+
+  // 1. Remplissage des données
+  nameEl.textContent = planetData.name;
+
+  // Si on a des infos encyclopédiques dans le JSON
+  if (planetData.info) {
+    descEl.textContent = planetData.info.description;
+    tempEl.textContent = planetData.info.temp_avg;
+    typeEl.textContent = planetData.info.composition;
+
+    // Image réelle
+    imgEl.src = `${planetData.info.image}`;
+    imgEl.style.display = 'block';
+  } else {
+    // Fallback si pas de données
+    descEl.textContent = "Données en cours de téléchargement...";
+    imgEl.style.display = 'none';
+    tempEl.textContent = "N/A";
+    typeEl.textContent = "N/A";
+  }
+
+  // Calcul de la durée du jour en heures pour l'affichage
+  const rotationHours = Math.abs(planetData.rotation_period_hours);
+  rotEl.textContent = rotationHours + " heures";
+
+  // 2. Affichage
+  panel.classList.remove('hidden');
 }
 
 init();

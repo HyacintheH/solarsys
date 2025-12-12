@@ -383,3 +383,73 @@ canvas {
     text-align: center;
     letter-spacing: 2px;
 }
+
+#planet-info-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    background: rgba(0, 0, 0, 0.85);
+    /* Fond très sombre pour lire le texte */
+    border: 1px solid #00d2ff;
+    border-radius: 10px;
+    padding: 20px;
+    color: #eee;
+    font-family: 'Orbitron', sans-serif;
+    z-index: 1000;
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+
+    /* Animation d'apparition */
+    transition: opacity 0.5s, transform 0.5s;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* État caché */
+#planet-info-panel.hidden {
+    display: none;
+    /* Ou opacity: 0 si tu veux juste fondre */
+    opacity: 0;
+    transform: translateX(50px);
+    /* Petit effet de glissement */
+    pointer-events: none;
+}
+
+#planet-info-panel h2 {
+    margin-top: 0;
+    color: #00d2ff;
+    text-transform: uppercase;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+    text-shadow: 0 0 10px #00d2ff;
+}
+
+#info-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #555;
+}
+
+#info-desc {
+    font-family: 'Arial', sans-serif;
+    /* Plus lisible pour les paragraphes */
+    font-size: 14px;
+    line-height: 1.5;
+    color: #ccc;
+    margin-bottom: 15px;
+}
+
+#info-stats {
+    list-style: none;
+    padding: 0;
+    font-size: 13px;
+    color: #00d2ff;
+}
+
+#info-stats li span {
+    color: white;
+    font-weight: bold;
+}
