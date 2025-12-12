@@ -17,6 +17,10 @@ const planetsList = [
 
 let isPaused = false; // Par défaut, ça tourne
 let timeScale = 1.0; // Vitesse par défaut
+let daysIncrement = 0; // Combien de "jours" passent à chaque image pour caler la Terre
+// On initialise à la date d'aujourd'hui
+let simDate = new Date();
+const dateDisplay = document.getElementById('date-display');
 
 let renderer, scene, camera, controls, sun;
 let planetObjects = [];
@@ -102,6 +106,16 @@ function loadPlanets() {
 
         // Si c'est le soleil, on le stocke dans la variable globale 'sun'
         if (rawPlanetData.name === "sun") sun = planet.mesh;
+
+        // --- CALIBRAGE DU TEMPS SUR LA TERRE ---
+        if (rawPlanetData.name === "earth") {
+          // planet.orbitSpeed est la vitesse angulaire (radians par frame)
+          // On veut que 1 tour complet (2 * PI) = 365.25 jours
+          // Donc : (orbitSpeed / 2PI) * 365.25 = Jours par frame
+          daysIncrement = (planet.orbitSpeed * 365.25) / (2 * Math.PI);
+
+          console.log("Système calibré sur la Terre. Jours par frame :", daysIncrement);
+        }
       });
       createLabels();
     });
@@ -161,7 +175,7 @@ function init() {
   // 8. UI & Events
   setupUI();
   window.addEventListener("resize", onWindowResize);
-
+  updateDateDisplay();
   animate();
 }
 
@@ -641,6 +655,17 @@ function animate() {
 
   // --- ZONE DE MOUVEMENT (Si le jeu tourne) ---
   if (!isPaused) {
+    // --- GESTION DU TEMPS SYNCHRONISÉE ---
+
+    // On utilise la valeur calculée sur la Terre.
+    // Si daysIncrement est 0 (chargement pas fini), on met 0.
+    const daysPassed = (daysIncrement || 0) * timeScale;
+
+    // On ajoute les millisecondes (jours * 24h * 60m * 60s * 1000ms)
+    simDate.setTime(simDate.getTime() + (daysPassed * 86400000));
+
+    updateDateDisplay();
+
     if (sun) sun.rotation.y += 0.001;
 
     animateAsteroids(timeScale);
@@ -676,6 +701,13 @@ function animate() {
 
   controls.update();
   renderer.render(scene, camera);
+}
+
+function updateDateDisplay() {
+  if (dateDisplay) {
+    // Format français : jour/mois/année
+    dateDisplay.textContent = simDate.toLocaleDateString('fr-FR');
+  }
 }
 
 init();
