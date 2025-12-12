@@ -326,49 +326,67 @@ export class Planet {
     });
   }
 
-  update() {
-    // 1. POSITION ORBITALE (KEPLER CORRIGÉ POUR LOGARITHMIQUE)
+  // Dans Planet.class.js
+
+  update(timeScale = 1) { // <--- Ajout du paramètre (1 par défaut)
+
+    // 1. POSITION ORBITALE
     if (this.semiMajorAxisKm > 0) {
+      // ... Calculs existants ...
+
+      // Calcul de la vitesse instantanée (Kepler)
+      // C'est ICI qu'on applique le multiplicateur du slider
+      let currentSpeed = this.orbitSpeed;
+
+      // Si on a l'effet Kepler (loi des aires)
+      const a = this.orbitDistance; // ou semiMajorAxisKm selon ton code précédent
+      // Attention : assure-toi d'utiliser les variables que tu as définies dans ton code final
+      // Si tu utilises la version simple :
+      // this.angle += this.orbitSpeed * timeScale;
+
+      // Si tu utilises la version Kepler (Loi des aires) :
+      // On recalcule le rayon actuel pour la physique
       const e = this.eccentricity;
+      const r_visual = (this.semiMajorAxisKm * (1 - e * e)) / (1 + e * Math.cos(this.angle));
+      // On convertit en visuel pour le calcul de proportion (ou on garde les proportions mathématiques)
+      // Simplification : On applique timeScale à la vitesse de base calculée
 
-      // A. Calcul de l'angle (Anomalie vraie)
-      // On garde la logique de vitesse précédente
-      // Note: Pour être physiquement parfait, la vitesse devrait varier selon r,
-      // mais pour une visualisation fluide, une vitesse moyenne ou ajustée suffit ici.
-      this.angle += this.orbitSpeed;
+      const instantSpeed = this.orbitSpeed * ((this.semiMajorAxisKm * this.semiMajorAxisKm) / (r_visual * r_visual)); // Si tu utilises r_visual, attention à l'échelle. 
+      // LE PLUS SIMPLE ET SÛR :
 
-      // B. Calcul du rayon RÉEL en km (Formule polaire de l'ellipse)
-      // r = a(1-e^2) / (1 + e*cos(theta))
-      const r_km =
-        (this.semiMajorAxisKm * (1 - e * e)) / (1 + e * Math.cos(this.angle));
+      // Appliquer le facteur temps au résultat final de la vitesse
+      // Si tu avais : this.angle += instantSpeed;
+      // Cela devient :
+      this.angle += instantSpeed * timeScale;
 
-      // C. Conversion du rayon réel en rayon VISUEL (Logarithmique)
-      // On appelle la fonction de scale ici, à chaque frame
-      const currentVisualRadius = this.scales.distance(r_km);
+      // ... Recalcul de la position X/Z ...
+      const finalRadius = (this.orbitDistance * (1 - e * e)) / (1 + e * Math.cos(this.angle)); // Si tu utilises orbitDistance (visuel)
 
-      // D. Mise à jour de la position
-      this.mesh.position.x = Math.cos(this.angle) * currentVisualRadius;
-      this.mesh.position.z = Math.sin(this.angle) * currentVisualRadius;
+      this.mesh.position.x = Math.cos(this.angle) * finalRadius;
+      this.mesh.position.z = Math.sin(this.angle) * finalRadius;
 
       this.updateOrbit();
     }
 
-    // Rotation sur soi-même
+    // 2. ROTATION SUR SOI-MÊME
     if (this.surfaceMesh) {
-      this.surfaceMesh.rotation.y += this.rotationSpeed;
+      // On accélère aussi la rotation jour/nuit
+      this.surfaceMesh.rotation.y += this.rotationSpeed * timeScale;
     }
 
-    // Rotation des nuages (un peu plus vite)
+    // ... Nuages ...
     if (this.cloudsMesh) {
-      this.cloudsMesh.rotation.y += this.rotationSpeed * 1.2;
+      this.cloudsMesh.rotation.y += (this.rotationSpeed * 1.2) * timeScale;
     }
 
-    // Satellites
+    // 3. SATELLITES
     if (this.satellites.length > 0) {
-      this.satellites.forEach((sat) => {
-        sat.angle += sat.speed;
+      this.satellites.forEach(sat => {
+        // On accélère l'orbite de la lune
+        sat.angle += sat.speed * timeScale;
         sat.pivot.rotation.y = sat.angle;
-        sat.mesh.rotation.y += sat.rotSpeed;
+        // On accélère la rotation de la lune
+        sat.mesh.rotation.y += sat.rotSpeed * timeScale;
       });
     }
   }

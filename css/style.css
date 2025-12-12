@@ -265,29 +265,34 @@ canvas {
 
 #btn-pause {
     position: absolute;
-    bottom: 60px; /* 20px (crédits) + 40px (hauteur + marge) */
-    right: 20px;  /* Aligné à droite comme les crédits */
+    bottom: 60px;
+    /* 20px (crédits) + 40px (hauteur + marge) */
+    right: 20px;
+    /* Aligné à droite comme les crédits */
     z-index: 1000;
 
     /* Style SF Néon */
     background: rgba(0, 0, 0, 0.6);
-    color: #00d2ff; /* Bleu cyan */
+    color: #00d2ff;
+    /* Bleu cyan */
     border: 1px solid rgba(0, 210, 255, 0.3);
     padding: 8px 15px;
-    border-radius: 20px; /* Arrondi */
+    border-radius: 20px;
+    /* Arrondi */
     cursor: pointer;
-    
+
     font-family: 'Orbitron', sans-serif;
     text-transform: uppercase;
     font-size: 12px;
     letter-spacing: 1px;
     transition: all 0.3s;
-    
+
     /* Pour centrer le texte/icone */
     display: flex;
     justify-content: center;
     align-items: center;
-    min-width: 80px; /* Largeur fixe pour ne pas bouger quand le texte change */
+    min-width: 80px;
+    /* Largeur fixe pour ne pas bouger quand le texte change */
 }
 
 #btn-pause:hover {
@@ -295,4 +300,64 @@ canvas {
     box-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
     border-color: #00d2ff;
     color: white;
+}
+
+#speed-controls {
+    position: absolute;
+    bottom: 110px;
+    /* 60px (pause) + 50px de marge */
+    right: 20px;
+    width: 150px;
+    z-index: 1000;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    /* Aligné à droite */
+    font-family: 'Orbitron', sans-serif;
+}
+
+#speed-controls label {
+    color: #00d2ff;
+    font-size: 12px;
+    margin-bottom: 5px;
+    text-shadow: 0 0 5px rgba(0, 210, 255, 0.5);
+    letter-spacing: 1px;
+}
+
+/* --- Style du Slider (Input Range) --- */
+#speed-slider {
+    -webkit-appearance: none;
+    /* Supprime le style par défaut */
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Le curseur (Thumb) */
+#speed-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: #00d2ff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00d2ff;
+    border: 2px solid white;
+    margin-top: -5px;
+    /* Pour centrer verticalement */
+}
+
+/* Firefox */
+#speed-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: #00d2ff;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00d2ff;
+    border: 2px solid white;
 }

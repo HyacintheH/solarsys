@@ -16,6 +16,7 @@ const planetsList = [
 ];
 
 let isPaused = false; // Par défaut, ça tourne
+let timeScale = 1.0; // Vitesse par défaut
 
 let renderer, scene, camera, controls, sun;
 let planetObjects = [];
@@ -415,9 +416,9 @@ function animateAsteroids() {
   // On parcourt chaque astéroïde
   asteroidData.forEach((data) => {
     // 1. On applique la petite rotation individuelle
-    data.dummy.rotation.x += data.rotationSpeed.x;
-    data.dummy.rotation.y += data.rotationSpeed.y;
-    data.dummy.rotation.z += data.rotationSpeed.z;
+    data.dummy.rotation.x += data.rotationSpeed.x * timeScale;
+    data.dummy.rotation.y += data.rotationSpeed.y * timeScale;
+    data.dummy.rotation.z += data.rotationSpeed.z * timeScale;
 
     // 2. On met à jour sa matrice mathématique
     data.dummy.updateMatrix();
@@ -612,6 +613,18 @@ function setupUI() {
       }
     });
   }
+
+  // --- SLIDER VITESSE ---
+  const speedSlider = document.getElementById('speed-slider');
+  const speedValue = document.getElementById('speed-value');
+
+  if (speedSlider) {
+    speedSlider.addEventListener('input', (e) => {
+      timeScale = parseFloat(e.target.value);
+      // Mise à jour de l'affichage du texte
+      speedValue.textContent = timeScale.toFixed(1);
+    });
+  }
 }
 
 function onWindowResize() {
@@ -630,7 +643,7 @@ function animate() {
   if (!isPaused) {
     if (sun) sun.rotation.y += 0.001;
 
-    animateAsteroids();
+    animateAsteroids(timeScale);
 
     // 1. MEMORISER LA POSITION AVANT MOUVEMENT
     let oldFocusPos = new THREE.Vector3();
@@ -639,7 +652,7 @@ function animate() {
     }
 
     // 2. DÉPLACER LES PLANÈTES
-    planetObjects.forEach((p) => p.update());
+    planetObjects.forEach((p) => p.update(timeScale));
 
     // 3. APPLIQUER LE DÉPLACEMENT À LA CAMÉRA (TOWING)
     if (focusedPlanet) {
