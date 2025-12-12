@@ -15,6 +15,8 @@ const planetsList = [
   "pluto",
 ];
 
+let isPaused = false; // Par défaut, ça tourne
+
 let renderer, scene, camera, controls, sun;
 let planetObjects = [];
 let focusedPlanet = null;
@@ -591,6 +593,25 @@ function setupUI() {
       }
     });
   }
+
+  // --- BOUTON PAUSE ---
+  const btnPause = document.getElementById('btn-pause');
+  if (btnPause) {
+    btnPause.addEventListener('click', () => {
+      isPaused = !isPaused; // On inverse l'état
+
+      // Mise à jour visuelle du bouton
+      if (isPaused) {
+        btnPause.textContent = "PLAY ▶";
+        btnPause.style.color = "#ffaa00"; // Orange quand en pause
+        btnPause.style.borderColor = "#ffaa00";
+      } else {
+        btnPause.textContent = "PAUSE ⏸";
+        btnPause.style.color = "#00d2ff"; // Bleu quand ça tourne
+        btnPause.style.borderColor = "rgba(0, 210, 255, 0.3)";
+      }
+    });
+  }
 }
 
 function onWindowResize() {
@@ -605,35 +626,39 @@ function onWindowResize() {
 function animate() {
   requestAnimationFrame(animate);
 
-  if (sun) sun.rotation.y += 0.001;
+  // --- ZONE DE MOUVEMENT (Si le jeu tourne) ---
+  if (!isPaused) {
+    if (sun) sun.rotation.y += 0.001;
 
-  animateAsteroids();
+    animateAsteroids();
 
-  // --- LOGIQUE DE SUIVI CAMÉRA (TOWING) ---
+    // 1. MEMORISER LA POSITION AVANT MOUVEMENT
+    let oldFocusPos = new THREE.Vector3();
+    if (focusedPlanet) {
+      oldFocusPos.copy(focusedPlanet.mesh.position);
+    }
 
-  // 1. Si une planète est ciblée, on mémorise sa position AVANT qu'elle ne bouge
-  let oldFocusPos = new THREE.Vector3();
-  if (focusedPlanet) {
-    oldFocusPos.copy(focusedPlanet.mesh.position);
+    // 2. DÉPLACER LES PLANÈTES
+    planetObjects.forEach((p) => p.update());
+
+    // 3. APPLIQUER LE DÉPLACEMENT À LA CAMÉRA (TOWING)
+    if (focusedPlanet) {
+      const newFocusPos = focusedPlanet.mesh.position;
+      const delta = new THREE.Vector3().subVectors(newFocusPos, oldFocusPos);
+
+      // On déplace la caméra exactement de la même distance que la planète
+      camera.position.add(delta);
+    }
   }
 
-  // 2. On fait bouger toutes les planètes (mise à jour de l'orbite)
-  planetObjects.forEach((p) => p.update());
+  // --- ZONE DE RENDU (Toujours active) ---
 
   updateLabelsPosition();
 
-  // 3. Si une planète est ciblée, on calcule son déplacement et on l'applique à la caméra
+  // On s'assure que les contrôles orbitent toujours autour de la cible
+  // (Important de le faire aussi en pause pour pouvoir tourner autour de la planète figée)
   if (focusedPlanet) {
-    const newFocusPos = focusedPlanet.mesh.position;
-
-    // Calcul du vecteur de déplacement (Delta = Nouveau - Ancien)
-    const delta = new THREE.Vector3().subVectors(newFocusPos, oldFocusPos);
-
-    // A. On déplace la caméra d'autant pour qu'elle "suive" le mouvement
-    camera.position.add(delta);
-
-    // B. On met à jour le centre de rotation des contrôles pour qu'il reste sur la planète
-    controls.target.copy(newFocusPos);
+    controls.target.copy(focusedPlanet.mesh.position);
   }
 
   controls.update();
