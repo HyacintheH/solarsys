@@ -24,9 +24,9 @@
     {
       "name": "mercury",
       "info": {
-        "description": "Mercure est la plus petite planète du système solaire et la plus proche du Soleil. Dépourvue d'atmosphère pour retenir la chaleur, elle subit les plus grands écarts de température : brûlante le jour, glaciale la nuit. Sa surface est criblée de cratères, ressemblant beaucoup à notre Lune.",
+        "description": "Mercure est la plus petite planète du système solaire et la plus proche du Soleil. Dépourvue d'atmosphère pour retenir la chaleur, elle subit les plus grands écarts de température.",
         "temp_avg": "-180°C à 430°C",
-        "composition": "Roche et Fer (Noyau énorme)",
+        "composition": "Roche et Fer",
         "image": "https://images-assets.nasa.gov/image/PIA14250/PIA14250~orig.jpg"
       },
       "type": "rocky",
@@ -143,7 +143,23 @@
         }
       },
       "eccentricity": 0.0934,
-      "mean_anomaly_deg": 19.41
+      "mean_anomaly_deg": 19.41,
+      "satellites": [
+        {
+          "name": "phobos",
+          "radius_km": 11.2,
+          "distance_from_parent_km": 9376,
+          "orbital_period_days": 0.31,
+          "texture": { "map": "phobosmap.jpg" }
+        },
+        {
+          "name": "deimos",
+          "radius_km": 6.2,
+          "distance_from_parent_km": 23463,
+          "orbital_period_days": 1.26,
+          "texture": { "map": "deimosmap.jpg" }
+        }
+      ]
     },
     {
       "name": "jupiter",
@@ -176,18 +192,28 @@
           "radius_km": 1821,
           "distance_from_parent_km": 421700,
           "orbital_period_days": 1.76,
-          "texture": {
-            "map": "iomap.jpg"
-          }
+          "texture": { "map": "iomap.jpg" }
         },
         {
           "name": "europa",
           "radius_km": 1560,
           "distance_from_parent_km": 670900,
           "orbital_period_days": 3.55,
-          "texture": {
-            "map": "europamap.jpg"
-          }
+          "texture": { "map": "europamap.jpg" }
+        },
+        {
+          "name": "ganymede",
+          "radius_km": 2634,
+          "distance_from_parent_km": 1070400,
+          "orbital_period_days": 7.15,
+          "texture": { "map": "ganymedemap.jpg" }
+        },
+        {
+          "name": "callisto",
+          "radius_km": 2410,
+          "distance_from_parent_km": 1882700,
+          "orbital_period_days": 16.69,
+          "texture": { "map": "callistomap.jpg" }
         }
       ]
     },
@@ -221,7 +247,58 @@
         }
       },
       "eccentricity": 0.0556,
-      "mean_anomaly_deg": 317.02
+      "mean_anomaly_deg": 317.02,
+      "satellites": [
+        {
+          "name": "mimas",
+          "radius_km": 198,
+          "distance_from_parent_km": 185000,
+          "orbital_period_days": 0.94,
+          "texture": { "map": "mimasmap.jpg" }
+        },
+        {
+          "name": "enceladus",
+          "radius_km": 252,
+          "distance_from_parent_km": 237948,
+          "orbital_period_days": 1.37,
+          "texture": { "map": "enceladusmap.jpg" }
+        },
+        {
+          "name": "tethys",
+          "radius_km": 531,
+          "distance_from_parent_km": 294619,
+          "orbital_period_days": 1.88,
+          "texture": { "map": "tethysmap.jpg" }
+        },
+        {
+          "name": "dione",
+          "radius_km": 561,
+          "distance_from_parent_km": 377396,
+          "orbital_period_days": 2.73,
+          "texture": { "map": "dionemap.jpg" }
+        },
+        {
+          "name": "rhea",
+          "radius_km": 763,
+          "distance_from_parent_km": 527108,
+          "orbital_period_days": 4.51,
+          "texture": { "map": "rheamap.jpg" }
+        },
+        {
+          "name": "titan",
+          "radius_km": 2574,
+          "distance_from_parent_km": 1221870,
+          "orbital_period_days": 15.94,
+          "texture": { "map": "titanmap.jpg" }
+        },
+        {
+          "name": "iapetus",
+          "radius_km": 734,
+          "distance_from_parent_km": 3560820,
+          "orbital_period_days": 79.32,
+          "texture": { "map": "iapetusmap.jpg" }
+        }
+      ]
     },
     {
       "name": "uranus",
@@ -247,7 +324,44 @@
         }
       },
       "eccentricity": 0.0472,
-      "mean_anomaly_deg": 142.23
+      "mean_anomaly_deg": 142.23,
+      "satellites": [
+        {
+          "name": "miranda",
+          "radius_km": 235,
+          "distance_from_parent_km": 129390,
+          "orbital_period_days": 1.41,
+          "texture": { "map": "mirandamap.jpg" }
+        },
+        {
+          "name": "ariel",
+          "radius_km": 578,
+          "distance_from_parent_km": 191020,
+          "orbital_period_days": 2.52,
+          "texture": { "map": "arielmap.jpg" }
+        },
+        {
+          "name": "umbriel",
+          "radius_km": 584,
+          "distance_from_parent_km": 266300,
+          "orbital_period_days": 4.14,
+          "texture": { "map": "umbrielmap.jpg" }
+        },
+        {
+          "name": "titania",
+          "radius_km": 788,
+          "distance_from_parent_km": 435910,
+          "orbital_period_days": 8.7,
+          "texture": { "map": "titaniamap.jpg" }
+        },
+        {
+          "name": "oberon",
+          "radius_km": 761,
+          "distance_from_parent_km": 583520,
+          "orbital_period_days": 13.46,
+          "texture": { "map": "oberonmap.jpg" }
+        }
+      ]
     },
     {
       "name": "neptune",
@@ -273,7 +387,16 @@
         }
       },
       "eccentricity": 0.0086,
-      "mean_anomaly_deg": 256.22
+      "mean_anomaly_deg": 256.22,
+      "satellites": [
+        {
+          "name": "triton",
+          "radius_km": 1353,
+          "distance_from_parent_km": 354759,
+          "orbital_period_days": -5.87,
+          "texture": { "map": "tritonmap.jpg" }
+        }
+      ]
     },
     {
       "name": "pluto",
@@ -291,17 +414,17 @@
       "axial_tilt_deg": 122.5,
       "texture": {
         "map": "plutomap.jpg",
-        "bump": "pluto_bump.jpg"
+        "bump": "plutobump.jpg"
       },
       "eccentricity": 0.2488,
       "mean_anomaly_deg": 14.88,
       "satellites": [
         {
           "name": "charon",
-          "radius": 606,
-          "distanceFromParent": 15,
-          "speed": 0.01,
-          "texture": "charonmap.jpg"
+          "radius_km": 606,
+          "distance_from_parent_km": 19591,
+          "orbital_period_days": 6.38,
+          "texture": { "map": "charonmap.jpg" }
         }
       ]
     }
