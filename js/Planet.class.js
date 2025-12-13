@@ -59,7 +59,8 @@ export class Planet {
     // 4. Calcul de l'angle actuel
     // Formule : Position Départ + (Nombre de tours effectués * 360)
     // Nombre de tours = Jours écoulés / Période orbitale
-    const totalDegrees = startDeg + (daysSinceJ2000 / this.data.orbital_period_days) * 360;
+    const totalDegrees =
+      startDeg + (daysSinceJ2000 / this.data.orbital_period_days) * 360;
 
     // 5. Conversion en Radians pour Three.js
     // On utilise le modulo (%) pour garder un angle propre, même si c'est pas obligatoire pour Math.cos
@@ -132,7 +133,7 @@ export class Planet {
     // If this.data.texture is undefined, we use a placeholder "Error Material"
     if (!this.data.texture || !this.data.texture.map) {
       console.warn(
-        `⚠️ Texture missing for: ${this.data.name || "Unknown Planet"}`
+        `Texture missing for: ${this.data.name || "Unknown Planet"}`
       );
       material = new THREE.MeshBasicMaterial({
         color: 0xff0000,
@@ -147,13 +148,6 @@ export class Planet {
           map: loader.load(`img/planisphere/${this.data.texture.map}`),
           color: 0xffffff,
         });
-
-        // --- CORRECTION LUMIÈRE ---
-        // Paramètres : Couleur, Intensité, Distance Max, Decay (Atténuation)
-
-        // 1. Intensité : 2 ou 3 (suffisant si le decay est à 0)
-        // 2. Distance : 0 = Infini (la lumière porte jusqu'au bout de la scène)
-        // 3. Decay : 0 = Pas d'atténuation physique. La lumière ne faiblit pas avec la distance.
 
         const sunLight = new THREE.PointLight(0xffffff, 2.5, 0, 0);
 
@@ -171,8 +165,6 @@ export class Planet {
 
         material = new THREE.MeshLambertMaterial({
           map: loader.load(texturePath),
-          // Lambert n'a pas de roughness/metalness, il réagit juste à la lumière
-          // C'est souvent mieux pour les planètes si on n'a pas de normal maps complexes
         });
 
         // Check for bump map specifically
@@ -197,7 +189,7 @@ export class Planet {
 
     if (this.data.type !== "star") {
       this.surfaceMesh.castShadow = true;
-      this.surfaceMesh.receiveShadow = true;
+      this.surfaceMesh.receiveShadow = false;
     }
 
     this.mesh.add(this.surfaceMesh);
@@ -283,7 +275,7 @@ export class Planet {
       let safeRadiusKm = satData.radius_km;
       if (!safeRadiusKm || isNaN(safeRadiusKm)) {
         console.warn(
-          `⚠️ Satellite Radius missing for moon of ${this.data.name}. Defaulting to 200km.`
+          `Satellite Radius missing for moon of ${this.data.name}. Defaulting to 200km.`
         );
         safeRadiusKm = 200; // Valeur par défaut
       }
@@ -294,7 +286,7 @@ export class Planet {
         mapTexture = loader.load(`img/planisphere/${satData.texture.map}`);
       } else {
         console.warn(
-          `⚠️ Satellite Texture missing for moon of ${this.data.name}. Using grey fallback.`
+          `Satellite Texture missing for moon of ${this.data.name}. Using grey fallback.`
         );
         // Pas de texture = on laisse null, le matériau sera juste gris/blanc
         mapTexture = null;
@@ -313,10 +305,9 @@ export class Planet {
 
       const geo = new THREE.SphereGeometry(rad, 32, 32); // C'est ici que ça plantait (32 segments)
 
-      const mat = new THREE.MeshStandardMaterial({
+      const mat = new THREE.MeshLambertMaterial({
         map: mapTexture,
-        color: mapTexture ? 0xffffff : 0x888888, // Gris si pas de texture
-        roughness: 0.9,
+        color: mapTexture ? 0xffffff : 0x888888,
       });
 
       // Matériaux Highlight/Realistic pour la lune aussi
@@ -328,7 +319,7 @@ export class Planet {
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.x = dist;
       mesh.castShadow = true;
-      mesh.receiveShadow = true;
+      mesh.receiveShadow = false;
 
       pivot.add(mesh);
       this.mesh.add(pivot);
@@ -351,7 +342,8 @@ export class Planet {
 
   // Dans Planet.class.js
 
-  update(timeScale = 1) { // <--- Ajout du paramètre (1 par défaut)
+  update(timeScale = 1) {
+    // <--- Ajout du paramètre (1 par défaut)
 
     // 1. POSITION ORBITALE
     if (this.semiMajorAxisKm > 0) {
@@ -370,11 +362,14 @@ export class Planet {
       // Si tu utilises la version Kepler (Loi des aires) :
       // On recalcule le rayon actuel pour la physique
       const e = this.eccentricity;
-      const r_visual = (this.semiMajorAxisKm * (1 - e * e)) / (1 + e * Math.cos(this.angle));
+      const r_visual =
+        (this.semiMajorAxisKm * (1 - e * e)) / (1 + e * Math.cos(this.angle));
       // On convertit en visuel pour le calcul de proportion (ou on garde les proportions mathématiques)
       // Simplification : On applique timeScale à la vitesse de base calculée
 
-      const instantSpeed = this.orbitSpeed * ((this.semiMajorAxisKm * this.semiMajorAxisKm) / (r_visual * r_visual)); // Si tu utilises r_visual, attention à l'échelle. 
+      const instantSpeed =
+        this.orbitSpeed *
+        ((this.semiMajorAxisKm * this.semiMajorAxisKm) / (r_visual * r_visual)); // Si tu utilises r_visual, attention à l'échelle.
       // LE PLUS SIMPLE ET SÛR :
 
       // Appliquer le facteur temps au résultat final de la vitesse
@@ -383,7 +378,8 @@ export class Planet {
       this.angle += instantSpeed * timeScale;
 
       // ... Recalcul de la position X/Z ...
-      const finalRadius = (this.orbitDistance * (1 - e * e)) / (1 + e * Math.cos(this.angle)); // Si tu utilises orbitDistance (visuel)
+      const finalRadius =
+        (this.orbitDistance * (1 - e * e)) / (1 + e * Math.cos(this.angle)); // Si tu utilises orbitDistance (visuel)
 
       this.mesh.position.x = Math.cos(this.angle) * finalRadius;
       this.mesh.position.z = Math.sin(this.angle) * finalRadius;
@@ -399,43 +395,17 @@ export class Planet {
 
     // ... Nuages ...
     if (this.cloudsMesh) {
-      this.cloudsMesh.rotation.y += (this.rotationSpeed * 1.2) * timeScale;
+      this.cloudsMesh.rotation.y += this.rotationSpeed * 1.2 * timeScale;
     }
 
     // 3. SATELLITES
     if (this.satellites.length > 0) {
-      this.satellites.forEach(sat => {
+      this.satellites.forEach((sat) => {
         // On accélère l'orbite de la lune
         sat.angle += sat.speed * timeScale;
         sat.pivot.rotation.y = sat.angle;
         // On accélère la rotation de la lune
         sat.mesh.rotation.y += sat.rotSpeed * timeScale;
-      });
-    }
-  }
-
-  toggleHighlight(isActive) {
-    // 1. GESTION DE LA PLANÈTE PRINCIPALE
-    if (this.surfaceMesh) {
-      if (isActive) {
-        this.surfaceMesh.material = this.highlightMaterial;
-      } else {
-        this.surfaceMesh.material = this.realisticMaterial;
-      }
-      this.surfaceMesh.material.needsUpdate = true;
-    }
-
-    // 2. GESTION DES SATELLITES (Lunes)
-    if (this.satellites.length > 0) {
-      this.satellites.forEach((sat) => {
-        if (isActive) {
-          // On passe la lune en mode "Lumière magique"
-          sat.mesh.material = sat.highlightMaterial;
-        } else {
-          // On repasse en mode "Physique" (Ombres)
-          sat.mesh.material = sat.realisticMaterial;
-        }
-        sat.mesh.material.needsUpdate = true;
       });
     }
   }

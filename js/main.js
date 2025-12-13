@@ -20,7 +20,7 @@ let timeScale = 1.0; // Vitesse par défaut
 let daysIncrement = 0; // Combien de "jours" passent à chaque image pour caler la Terre
 // On initialise à la date d'aujourd'hui
 let simDate = new Date();
-const dateDisplay = document.getElementById('date-display');
+const dateDisplay = document.getElementById("date-display");
 
 let renderer, scene, camera, controls, sun;
 let planetObjects = [];
@@ -114,7 +114,10 @@ function loadPlanets() {
           // Donc : (orbitSpeed / 2PI) * 365.25 = Jours par frame
           daysIncrement = (planet.orbitSpeed * 365.25) / (2 * Math.PI);
 
-          console.log("Système calibré sur la Terre. Jours par frame :", daysIncrement);
+          console.log(
+            "Système calibré sur la Terre. Jours par frame :",
+            daysIncrement
+          );
         }
       });
       createLabels();
@@ -131,6 +134,11 @@ function init() {
   // IMPORTANT : On utilise les dimensions du conteneur, pas de la fenêtre
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
+
+  // Le Tone Mapping ACESFilmic est le standard cinéma/jeu vidéo.
+  // Il "comprime" les blancs trop forts pour révéler les détails des textures.
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.5;
 
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -153,10 +161,6 @@ function init() {
   // 5. Lumières
   // const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Lumière blanche à 60%
   // scene.add(ambientLight);
-
-  // Le Soleil reste tel quel
-  const sunLight = new THREE.PointLight(0xffffff, 3, 5000); // Garde ça
-  scene.add(sunLight);
 
   // 6. Monde
   createStarfield();
@@ -183,23 +187,34 @@ function createSun() {
   const loader = new THREE.TextureLoader();
   const texture = loader.load("img/planisphere/sunmap.jpg");
 
-  // 1. LE SOLEIL GÉANT
-  // Rayon passé de 80 à 300
   const geometry = new THREE.SphereGeometry(300, 64, 64);
+  // Utilise BasicMaterial pour que le soleil soit toujours brillant (il émet sa lumière)
   const material = new THREE.MeshBasicMaterial({
     map: texture,
     color: 0xffffff,
   });
   sun = new THREE.Mesh(geometry, material);
+
+  // IMPORTANT : Le soleil ne doit pas recevoir d'ombre, ni en projeter sur lui-même de façon bizarre
+  sun.castShadow = false;
+  sun.receiveShadow = false;
+
   scene.add(sun);
 
-  // 2. LA LUMIÈRE (Doit aller plus loin)
-  // On augmente l'intensité car les planètes sont plus loin
-  const sunLight = new THREE.PointLight(0xffffff, 3000000, 0);
+  // LA SOURCE DE LUMIÈRE
+  // PointLight = Une ampoule qui éclaire à 360°
+  // Distance = 0 (Infini, pas de limite de portée)
+  // Decay = 0 (La lumière ne faiblit pas physiquement, vital pour ton échelle)
+  const sunLight = new THREE.PointLight(0xffffff, 2.0, 0, 0);
 
-  // Configuration des ombres pour le soleil géant
+  // Note: Intensité à 2.0 ou 3.0 suffit si Decay est à 0.
+  // 3000000 c'était pour compenser un Decay physique (2).
+
   sunLight.castShadow = true;
+  sunLight.shadow.mapSize.width = 4096; // Ombres plus nettes
+  sunLight.shadow.mapSize.height = 4096;
   sunLight.shadow.bias = -0.0001;
+
   sun.add(sunLight);
 
   // 3. LE HALO (Doit être proportionnel au soleil)
@@ -449,12 +464,7 @@ function animateAsteroids() {
 }
 
 function focusOnPlanet(planet) {
-  // 1. Gestion du highlight (comme avant)
-  if (focusedPlanet && focusedPlanet !== planet) {
-    focusedPlanet.toggleHighlight(false);
-  }
   focusedPlanet = planet;
-  planet.toggleHighlight(true);
 
   // 2. CALCUL DU ZOOM IDÉAL
   // On veut se placer à une distance proportionnelle au rayon visuel de la planète.
@@ -492,11 +502,6 @@ function focusOnPlanet(planet) {
 }
 
 function resetView() {
-  // 1. IMPORTANT : On éteint la lumière de la planète qu'on quitte
-  if (focusedPlanet) {
-    focusedPlanet.toggleHighlight(false);
-  }
-
   focusedPlanet = null;
 
   // 2. UI Reset
@@ -510,8 +515,8 @@ function resetView() {
   controls.update();
 
   // CACHER LE PANNEAU
-  const panel = document.getElementById('planet-info-panel');
-  panel.classList.add('hidden');
+  const panel = document.getElementById("planet-info-panel");
+  panel.classList.add("hidden");
 }
 
 // --- CONFIGURATION DE L'INTERFACE (UI) ---
@@ -617,9 +622,9 @@ function setupUI() {
   }
 
   // --- BOUTON PAUSE ---
-  const btnPause = document.getElementById('btn-pause');
+  const btnPause = document.getElementById("btn-pause");
   if (btnPause) {
-    btnPause.addEventListener('click', () => {
+    btnPause.addEventListener("click", () => {
       isPaused = !isPaused; // On inverse l'état
 
       // Mise à jour visuelle du bouton
@@ -636,11 +641,11 @@ function setupUI() {
   }
 
   // --- SLIDER VITESSE ---
-  const speedSlider = document.getElementById('speed-slider');
-  const speedValue = document.getElementById('speed-value');
+  const speedSlider = document.getElementById("speed-slider");
+  const speedValue = document.getElementById("speed-value");
 
   if (speedSlider) {
-    speedSlider.addEventListener('input', (e) => {
+    speedSlider.addEventListener("input", (e) => {
       timeScale = parseFloat(e.target.value);
       // Mise à jour de l'affichage du texte
       speedValue.textContent = timeScale.toFixed(1);
@@ -669,7 +674,7 @@ function animate() {
     const daysPassed = (daysIncrement || 0) * timeScale;
 
     // On ajoute les millisecondes (jours * 24h * 60m * 60s * 1000ms)
-    simDate.setTime(simDate.getTime() + (daysPassed * 86400000));
+    simDate.setTime(simDate.getTime() + daysPassed * 86400000);
 
     updateDateDisplay();
 
@@ -713,18 +718,18 @@ function animate() {
 function updateDateDisplay() {
   if (dateDisplay) {
     // Format français : jour/mois/année
-    dateDisplay.textContent = simDate.toLocaleDateString('fr-FR');
+    dateDisplay.textContent = simDate.toLocaleDateString("fr-FR");
   }
 }
 
 function updateInfoPanel(planetData) {
-  const panel = document.getElementById('planet-info-panel');
-  const nameEl = document.getElementById('info-name');
-  const imgEl = document.getElementById('info-img');
-  const descEl = document.getElementById('info-desc');
-  const tempEl = document.getElementById('info-temp');
-  const typeEl = document.getElementById('info-type');
-  const rotEl = document.getElementById('info-rotation');
+  const panel = document.getElementById("planet-info-panel");
+  const nameEl = document.getElementById("info-name");
+  const imgEl = document.getElementById("info-img");
+  const descEl = document.getElementById("info-desc");
+  const tempEl = document.getElementById("info-temp");
+  const typeEl = document.getElementById("info-type");
+  const rotEl = document.getElementById("info-rotation");
 
   // 1. Remplissage des données
   nameEl.textContent = planetData.name;
@@ -737,11 +742,11 @@ function updateInfoPanel(planetData) {
 
     // Image réelle
     imgEl.src = `${planetData.info.image}`;
-    imgEl.style.display = 'block';
+    imgEl.style.display = "block";
   } else {
     // Fallback si pas de données
     descEl.textContent = "Données en cours de téléchargement...";
-    imgEl.style.display = 'none';
+    imgEl.style.display = "none";
     tempEl.textContent = "N/A";
     typeEl.textContent = "N/A";
   }
@@ -751,7 +756,7 @@ function updateInfoPanel(planetData) {
   rotEl.textContent = rotationHours + " heures";
 
   // 2. Affichage
-  panel.classList.remove('hidden');
+  panel.classList.remove("hidden");
 }
 
 init();
