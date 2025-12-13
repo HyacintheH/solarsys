@@ -233,8 +233,7 @@ export class Planet {
     const inner = this.scales.radius(params.inner_radius_km);
     const outer = this.scales.radius(params.outer_radius_km);
 
-    // On augmente un peu les segments pour que ce soit plus joli (128 -> 180)
-    const geometry = new THREE.RingGeometry(inner, outer, 180);
+    const geometry = new THREE.RingGeometry(inner, outer, 128);
 
     // --- CHARGEMENT DES TEXTURES ---
     const colorMap = loader.load(`img/planisphere/${params.map}`);
@@ -297,63 +296,78 @@ export class Planet {
   createSatellites() {
     const loader = new THREE.TextureLoader();
 
-    this.data.satellites.forEach((satData) => {
-      // --- SÉCURITÉ 1 : Validation du Rayon ---
-      let safeRadiusKm = satData.radius_km;
-      if (!safeRadiusKm || isNaN(safeRadiusKm)) {
-        console.warn(
-          `Satellite Radius missing for moon of ${this.data.name}. Defaulting to 200km.`
-        );
-        safeRadiusKm = 200; // Valeur par défaut
-      }
+    // 1. On calcule la limite visuelle de la planète (Surface ou Anneaux)
+    let safeZoneRadius = this.visualRadius; // Par défaut : la surface
 
-      // --- SÉCURITÉ 2 : Validation de la Texture ---
-      let mapTexture;
-      if (satData.texture && satData.texture.map) {
-        mapTexture = loader.load(`img/planisphere/${satData.texture.map}`);
-      } else {
-        console.warn(
-          `Satellite Texture missing for moon of ${this.data.name}. Using grey fallback.`
-        );
-        // Pas de texture = on laisse null, le matériau sera juste gris/blanc
-        mapTexture = null;
-      }
-
-      // Pivot pour l'orbite
-      const pivot = new THREE.Group();
-
-      // Calculs via le système d'échelle
-      let rad = this.scales.radius(safeRadiusKm);
-      if (isNaN(rad)) rad = 0.5; // Ultime sécurité si l'échelle renvoie NaN
-
-      const dist = this.scales.satelliteDistance(
-        satData.distance_from_parent_km
+    // Si la planète a des anneaux, la "zone sûre" est le bord extérieur des anneaux
+    if (this.data.features && this.data.features.rings) {
+      // On convertit le rayon réel de l'anneau (km) en rayon visuel (scène)
+      // On utilise la même échelle que pour dessiner l'anneau (scales.radius)
+      const outerRingVisual = this.scales.radius(
+        this.data.features.rings.outer_radius_km
       );
 
-      const geo = new THREE.SphereGeometry(rad, 32, 32); // C'est ici que ça plantait (32 segments)
+      // On prend la plus grande valeur pour être sûr
+      safeZoneRadius = Math.max(safeZoneRadius, outerRingVisual);
+    }
+
+    // On ajoute une petite marge de sécurité (ex: +10% ou +2 unités)
+    safeZoneRadius *= 1.1;
+
+    this.data.satellites.forEach((satData) => {
+      // ... (Vos vérifications de sécurité radius_km / texture existantes) ...
+
+      let safeRadiusKm = satData.radius_km || 200;
+      let mapTexture =
+        satData.texture && satData.texture.map
+          ? loader.load(`img/planisphere/${satData.texture.map}`)
+          : null;
+
+      const pivot = new THREE.Group();
+
+      let rad = this.scales.radius(safeRadiusKm);
+      if (isNaN(rad)) rad = 0.5;
+
+      // --- CALCUL ET CORRECTION DE LA DISTANCE ---
+
+      // 1. Calcul théorique selon votre formule actuelle
+      let dist = this.scales.satelliteDistance(satData.distance_from_parent_km);
+
+      // 2. CORRECTION : Si la lune tombe dans la "Zone Interdite", on la pousse dehors
+      if (dist < safeZoneRadius) {
+        // On la place à la limite de la zone sûre
+        // L'astuce : pour garder l'ordre des lunes (Mimas < Encelade),
+        // on peut ajouter une toute petite valeur basée sur leur distance réelle
+        dist = safeZoneRadius + satData.distance_from_parent_km * 0.00001;
+      }
+
+      // -------------------------------------------
+
+      const geo = new THREE.SphereGeometry(rad, 32, 32);
 
       const mat = new THREE.MeshLambertMaterial({
         map: mapTexture,
         color: mapTexture ? 0xffffff : 0x888888,
       });
 
-      // Matériaux Highlight/Realistic pour la lune aussi
+      // Matériaux Highlight/Realistic (si vous les utilisez encore)
       const highMat = new THREE.MeshBasicMaterial({
         map: mapTexture,
-        color: mapTexture ? 0xbbbbbb : 0xff0000, // Rouge si pas de texture en mode highlight
+        color: mapTexture ? 0xbbbbbb : 0xff0000,
       });
 
       const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.x = dist;
+
+      mesh.position.x = dist; // On utilise la distance corrigée
+
       mesh.castShadow = true;
-      mesh.receiveShadow = false;
+      mesh.receiveShadow = false; // Important pour éviter les lunes noires
 
       pivot.add(mesh);
       this.mesh.add(pivot);
 
-      // Stockage pour update
       this.satellites.push({
-        data: satData, // IMPORTANT : On stocke les data pour les Labels !
+        data: satData,
         pivot: pivot,
         mesh: mesh,
         angle: Math.random() * Math.PI * 2,
@@ -367,15 +381,11 @@ export class Planet {
     });
   }
 
-  // Dans Planet.class.js
-
   update(timeScale = 1) {
     // <--- Ajout du paramètre (1 par défaut)
 
     // 1. POSITION ORBITALE
     if (this.semiMajorAxisKm > 0) {
-      // ... Calculs existants ...
-
       // Calcul de la vitesse instantanée (Kepler)
       // C'est ICI qu'on applique le multiplicateur du slider
       let currentSpeed = this.orbitSpeed;
