@@ -224,32 +224,59 @@ export class Planet {
     this.mesh.add(this.cloudsMesh);
   }
 
+  // Dans Planet.class.js
+
   createRings() {
     const params = this.data.features.rings;
     const loader = new THREE.TextureLoader();
 
-    // Conversion des rayons réels (km) avec l'échelle de rayon
     const inner = this.scales.radius(params.inner_radius_km);
     const outer = this.scales.radius(params.outer_radius_km);
 
-    const geometry = new THREE.RingGeometry(inner, outer, 128);
-    const material = new THREE.MeshStandardMaterial({
-      map: loader.load(`img/planisphere/${params.map}`),
-      side: THREE.DoubleSide,
+    // On augmente un peu les segments pour que ce soit plus joli (128 -> 180)
+    const geometry = new THREE.RingGeometry(inner, outer, 180);
+
+    // --- CHARGEMENT DES TEXTURES ---
+    const colorMap = loader.load(`img/planisphere/${params.map}`);
+
+    // --- MATÉRIAU "GLACE" AMÉLIORÉ ---
+    const material = new THREE.MeshLambertMaterial({
+      map: colorMap,
+      color: 0xffffff, // Base blanche
+
+      // LE SECRET DE LA LUMINOSITÉ :
+      // On force les anneaux à émettre de la lumière (couleur glace)
+      // Cela évite qu'ils soient noirs s'ils ne sont pas face au soleil
+      emissive: 0x999999,
+      emissiveMap: colorMap, // Les détails de la texture guident l'émission
+      emissiveIntensity: 0.8, // Puissance de l'éclat
+
+      side: THREE.DoubleSide, // Visible des deux côtés (Dessus/Dessous)
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
     });
 
     if (params.alpha) {
-      material.alphaMap = loader.load(`img/planisphere/${params.alpha}`);
-      material.alphaTest = 0.1;
+      const alphaMap = loader.load(`img/planisphere/${params.alpha}`);
+      material.alphaMap = alphaMap;
+      material.alphaTest = 0.1; // Aide à découper proprement les bords transparents
     }
 
-    const rings = new THREE.Mesh(geometry, material);
-    rings.rotation.x = -Math.PI / 2;
-    rings.castShadow = true;
-    rings.receiveShadow = true;
-    this.mesh.add(rings);
+    // Important : on stocke le mesh dans une variable de classe pour pouvoir l'animer
+    this.ringsMesh = new THREE.Mesh(geometry, material);
+
+    // Orientation correcte
+    this.ringsMesh.rotation.x = -Math.PI / 2;
+
+    // OMBRES :
+    // Les anneaux doivent projeter de l'ombre sur la planète
+    this.ringsMesh.castShadow = true;
+    // Pour éviter qu'ils ne deviennent noirs à cause de leur propre ombre,
+    // on peut désactiver receiveShadow, OU compter sur l'emissive qu'on vient d'ajouter.
+    // Essayons avec TRUE d'abord, si c'est trop sombre, passez à FALSE.
+    this.ringsMesh.receiveShadow = false;
+
+    this.mesh.add(this.ringsMesh);
   }
 
   makeEmissive() {
@@ -407,6 +434,15 @@ export class Planet {
         // On accélère la rotation de la lune
         sat.mesh.rotation.y += sat.rotSpeed * timeScale;
       });
+    }
+
+    // 4. ANIMATION DES ANNEAUX
+    // Si la planète possède des anneaux (on vérifie si ringsMesh existe)
+    if (this.ringsMesh) {
+      // On fait tourner le mesh sur son axe Z local (qui est l'axe "vertical" par rapport au plan des anneaux)
+      // La vitesse est arbitraire ici, ajustez 0.001 selon votre goût.
+      // Le signe '-' assure le bon sens de rotation (anti-horaire).
+      this.ringsMesh.rotation.z -= 0.001 * timeScale;
     }
   }
 
