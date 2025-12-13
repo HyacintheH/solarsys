@@ -23,6 +23,12 @@
     },
     {
       "name": "mercury",
+      "info": {
+        "description": "Mercure est la plus petite planète du système solaire et la plus proche du Soleil. Dépourvue d'atmosphère pour retenir la chaleur, elle subit les plus grands écarts de température : brûlante le jour, glaciale la nuit. Sa surface est criblée de cratères, ressemblant beaucoup à notre Lune.",
+        "temp_avg": "-180°C à 430°C",
+        "composition": "Roche et Fer (Noyau énorme)",
+        "image": "https://images-assets.nasa.gov/image/PIA14250/PIA14250~orig.jpg"
+      },
       "type": "rocky",
       "radius_km": 2439.7,
       "distance_from_sun_km": 57900000,
@@ -44,6 +50,12 @@
     },
     {
       "name": "venus",
+      "info": {
+        "description": "Vénus est souvent appelée la 'sœur jumelle' de la Terre en raison de sa taille similaire, mais c'est un enfer volcanique. Son atmosphère est si dense (composée de dioxyde de carbone) qu'elle crée l'effet de serre le plus puissant du système solaire. La pression y est équivalente à celle que l'on trouve à 900 mètres sous l'eau.",
+        "temp_avg": "464°C (constante)",
+        "composition": "Silicates, Roches et Lave",
+        "image": "https://images-assets.nasa.gov/image/PIA01544/PIA01544~orig.jpg"
+      },
       "type": "rocky",
       "radius_km": 6051.8,
       "distance_from_sun_km": 108200000,
@@ -108,6 +120,12 @@
     },
     {
       "name": "mars",
+      "info": {
+        "description": "Mars est souvent appelée la 'Planète rouge' en raison de l'oxyde de fer répandu sur sa surface. Elle possède les plus grands volcans et vallées du système solaire.",
+        "temp_avg": "-63°C",
+        "composition": "Roche et Poussière",
+        "image": "https://images-assets.nasa.gov/image/PIA04591/PIA04591~orig.jpg"
+      },
       "type": "rocky",
       "radius_km": 3389.5,
       "distance_from_sun_km": 227900000,
@@ -129,6 +147,12 @@
     },
     {
       "name": "jupiter",
+      "info": {
+        "description": "Jupiter est la plus grande planète du système solaire et un géant gazeux. Son atmosphère est composée principalement d'hydrogène et d'hélium. Elle est célèbre pour sa Grande Tache Rouge, une tempête anticyclonique massive qui fait rage depuis des siècles et est plus grande que la Terre. Elle possède un puissant champ magnétique et plus de 90 lunes confirmées.",
+        "temp_avg": "-145°C (sommet des nuages)",
+        "composition": "Gaz (Hydrogène, Hélium)",
+        "image": "https://images-assets.nasa.gov/image/PIA01370/PIA01370~orig.jpg"
+      },
       "type": "gas_giant",
       "radius_km": 69911,
       "distance_from_sun_km": 778500000,
@@ -169,6 +193,12 @@
     },
     {
       "name": "saturn",
+      "info": {
+        "description": "Saturne est le deuxième plus grand géant gazeux du système solaire et la moins dense de toutes les planètes ; elle pourrait flotter sur l'eau. Son système d'anneaux emblématique, composé de milliards de particules de glace et de roche, est le plus vaste et le plus complexe jamais observé. Elle est un monde de vents violents et possède de nombreuses lunes, dont Titan, qui est le seul satellite à posséder une atmosphère dense.",
+        "temp_avg": "-178°C (sommet des nuages)",
+        "composition": "Gaz (Hydrogène, Hélium), Glace",
+        "image": "https://images-assets.nasa.gov/image/PIA04913/PIA04913~orig.jpg"
+      },
       "type": "gas_giant",
       "radius_km": 58232,
       "distance_from_sun_km": 1434000000,
@@ -195,6 +225,12 @@
     },
     {
       "name": "uranus",
+      "info": {
+        "description": "Uranus est le septième et troisième plus grand corps du système solaire. Il est classé comme un 'géant de glace', car il contient plus de substances volatiles (eau, méthane et ammoniac) que les géants gazeux classiques. Son trait le plus remarquable est son inclinaison axiale de près de 98 degrés, ce qui signifie qu'il roule sur son orbite comme un tonneau. Ses pôles subissent ainsi des demi-années de lumière solaire, suivies de demi-années d'obscurité totale.",
+        "temp_avg": "-216°C",
+        "composition": "Glaces (Eau, Méthane, Ammoniac)",
+        "image": "https://images-assets.nasa.gov/image/PIA18182/PIA18182~orig.jpg"
+      },
       "type": "ice_giant",
       "radius_km": 25362,
       "distance_from_sun_km": 2871000000,
@@ -215,6 +251,12 @@
     },
     {
       "name": "neptune",
+      "info": {
+        "description": "Neptune est le huitième et le plus éloigné corps du système solaire. Il fait partie des 'géants de glace' et est caractérisé par les vents les plus rapides du système solaire, pouvant atteindre 2 100 km/h. Sa couleur bleue intense est le résultat de la présence de méthane dans son atmosphère. Sa plus grande lune, Triton, est la seule grande lune orbitant en sens inverse (rétrograde), suggérant qu'elle a été capturée par Neptune.",
+        "temp_avg": "-201°C (température effective)",
+        "composition": "Glaces (Eau, Méthane, Ammoniac)",
+        "image": "https://images-assets.nasa.gov/image/PIA02210/PIA02210~orig.jpg"
+      },
       "type": "ice_giant",
       "radius_km": 24622,
       "distance_from_sun_km": 4495000000,
@@ -235,6 +277,12 @@
     },
     {
       "name": "pluto",
+      "info": {
+        "description": "Pluton est le plus grand objet de la ceinture de Kuiper et une planète naine. Elle a été reclassée en 2006, mais reste un monde fascinant avec un cœur de glace d'azote en forme de cœur ('Tombaugh Regio'). Son orbite est très excentrique (elliptique), la faisant parfois s'approcher du Soleil plus que Neptune. Elle possède une atmosphère fine qui gèle et s'effondre lorsqu'elle s'éloigne du Soleil.",
+        "temp_avg": "-230°C",
+        "composition": "Glace (Azote, Méthane, Monoxyde de carbone) et Roche",
+        "image": "https://images-assets.nasa.gov/image/PIA02210/PIA02210~orig.jpg"
+      },
       "type": "dwarf_planet",
       "radius_km": 1188,
       "distance_from_sun_km": 5900000000,
